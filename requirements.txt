@@ -1,0 +1,30 @@
+﻿# Core FastAPI and web framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+
+# Audio processing
+librosa==0.10.1
+scipy==1.11.4
+numpy==1.24.4
+noisereduce==3.0.0
+pydub==0.25.1
+
+# LLM integration
+ollama==0.1.7
+
+# Data validation
+pydantic==2.5.0
+
+# Configuration and environment
+python-dotenv==1.0.0
+
+# Development and testing (optional)
+pytest==7.4.3
+pytest-asyncio==0.21.1
+
+# Audio format support
+soundfile==0.12.1
+
+# Signal processing
+matplotlib==3.7.4  # For potential visualization features
