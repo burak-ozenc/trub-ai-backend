@@ -9,14 +9,18 @@ from app.core.exceptions import AudioProcessingError, FileProcessingError, LLMSe
 
 router = APIRouter(prefix="/analysis", tags=["analysis"])
 
+
 def get_audio_processor() -> AudioProcessorService:
     return AudioProcessorService()
+
 
 def get_llm_service() -> LLMService:
     return LLMService()
 
+
 def get_file_service() -> FileService:
     return FileService()
+
 
 @router.post("/comprehensive")
 async def comprehensive_analysis(
@@ -54,16 +58,27 @@ async def comprehensive_analysis(
         file_path = await file_service.save_uploaded_file(audioData)
 
         try:
-            # Perform technical analysis
-            analysis_result = audio_processor.analyze_audio(file_path, analysis_enum)
+            # Perform technical analysis with trumpet detection
+            analysis_result, trumpet_detection = audio_processor.analyze_audio(file_path, analysis_enum)
+            print("trumpet_detection.is_trumpet",trumpet_detection.is_trumpet)
+            # Check if trumpet was detected
+            if not trumpet_detection.is_trumpet:
+                return {
+                    "error": "No trumpet detected",
+                    "detection_result": trumpet_detection.dict(),
+                    "message": trumpet_detection.warning_message or "Please ensure you're playing a trumpet and try again.",
+                    "recommendations": trumpet_detection.recommendations,
+                    "file_path": file_path
+                }
 
-            # Get LLM feedback
+            # Proceed with LLM feedback only if trumpet detected
             llm_response = await llm_service.get_comprehensive_feedback(analysis_result, guidance)
 
             return {
                 "feedback": llm_response.feedback,
                 "technical_analysis": llm_response.technical_analysis,
                 "recommendations": llm_response.recommendations,
+                "detection_result": trumpet_detection.dict(),
                 "analysis_type": analysis_type,
                 "user_question": guidance,
                 "file_path": file_path

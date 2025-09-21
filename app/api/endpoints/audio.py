@@ -50,7 +50,7 @@ async def analyze_audio(
 
         try:
             # Analyze audio
-            analysis_result = audio_processor.analyze_audio(file_path, analysis_enum)
+            analysis_result, trumpet_detection = audio_processor.analyze_audio(file_path, analysis_enum)
 
             # Extract technical data
             technical_data = audio_processor.extract_technical_data(analysis_result)
@@ -59,6 +59,7 @@ async def analyze_audio(
                 "analysis_type": analysis_type,
                 "technical_analysis": technical_data,
                 "raw_results": analysis_result.dict(exclude_none=True),
+                "detection_result": trumpet_detection.dict(),
                 "file_path": file_path
             }
 
@@ -96,10 +97,11 @@ async def analyze_breath_control(
 
         try:
             # Analyze breath control only
-            analysis_result = audio_processor.analyze_audio(file_path, AnalysisType.BREATH)
+            analysis_result, trumpet_detection = audio_processor.analyze_audio(file_path, AnalysisType.BREATH)
 
             return {
                 "breath_analysis": analysis_result.breath_control.dict() if analysis_result.breath_control else None,
+                "detection_result": trumpet_detection.dict(),
                 "file_path": file_path
             }
 
@@ -137,10 +139,11 @@ async def analyze_tone_quality(
 
         try:
             # Analyze tone quality only
-            analysis_result = audio_processor.analyze_audio(file_path, AnalysisType.TONE)
+            analysis_result, trumpet_detection = audio_processor.analyze_audio(file_path, AnalysisType.TONE)
 
             return {
                 "tone_analysis": analysis_result.tone_quality.dict() if analysis_result.tone_quality else None,
+                "detection_result": trumpet_detection.dict(),
                 "file_path": file_path
             }
 

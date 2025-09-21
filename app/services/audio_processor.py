@@ -2,53 +2,64 @@
 from app.utils.audio_utils import AudioPreprocessor
 from app.analyzers.breath_analyzer import BreathControlAnalyzer
 from app.analyzers.tone_analyzer import ToneAnalyzer
-from app.core.models import AudioAnalysisResult, AnalysisType
+from app.analyzers.trumpet_detector import TrumpetDetector
+from app.core.models import AudioAnalysisResult, AnalysisType, TrumpetDetectionResult
 from app.core.exceptions import AudioProcessingError, AnalysisError
+
 
 class AudioProcessorService:
     """Main service for orchestrating audio analysis"""
 
     def __init__(self):
         self.preprocessor = AudioPreprocessor()
+        self.trumpet_detector = TrumpetDetector()
         self.breath_analyzer = BreathControlAnalyzer()
         self.tone_analyzer = ToneAnalyzer()
 
-    def analyze_audio(self, file_path: str, analysis_type: AnalysisType = AnalysisType.FULL) -> AudioAnalysisResult:
+    def analyze_audio(self, file_path: str, analysis_type: AnalysisType = AnalysisType.FULL) -> tuple[
+        AudioAnalysisResult, TrumpetDetectionResult]:
         """
-        Main method to analyze audio file
+        Main method to analyze audio file with trumpet detection
         
         Args:
             file_path: Path to audio file
             analysis_type: Type of analysis to perform
             
         Returns:
-            AudioAnalysisResult with requested analysis
+            Tuple of (AudioAnalysisResult, TrumpetDetectionResult)
         """
         try:
             # Load and preprocess audio
             y, sr = self.preprocessor.load_and_preprocess(file_path)
 
+            # Step 1: Detect if this is actually a trumpet
+            trumpet_detection = self.trumpet_detector.analyze(y, sr)
+            
+            print("Checking trumpet detection :", trumpet_detection)
+
             # Initialize result
             result = AudioAnalysisResult()
 
-            # Perform requested analysis
-            if analysis_type in [AnalysisType.FULL, AnalysisType.BREATH]:
-                result.breath_control = self.breath_analyzer.analyze(y, sr)
+            # Only proceed with detailed analysis if trumpet is detected with sufficient confidence
+            if trumpet_detection.is_trumpet:
+                # Perform requested analysis
+                if analysis_type in [AnalysisType.FULL, AnalysisType.BREATH]:
+                    result.breath_control = self.breath_analyzer.analyze(y, sr)
 
-            if analysis_type in [AnalysisType.FULL, AnalysisType.TONE]:
-                result.tone_quality = self.tone_analyzer.analyze(y, sr)
+                if analysis_type in [AnalysisType.FULL, AnalysisType.TONE]:
+                    result.tone_quality = self.tone_analyzer.analyze(y, sr)
 
-            # TODO: Add other analyzers as they're implemented
-            # if analysis_type in [AnalysisType.FULL, AnalysisType.RHYTHM]:
-            #     result.rhythm_timing = self.rhythm_analyzer.analyze(y, sr)
+                # TODO: Add other analyzers as they're implemented
+                # if analysis_type in [AnalysisType.FULL, AnalysisType.RHYTHM]:
+                #     result.rhythm_timing = self.rhythm_analyzer.analyze(y, sr)
 
-            # if analysis_type in [AnalysisType.FULL, AnalysisType.EXPRESSION]:
-            #     result.expression = self.expression_analyzer.analyze(y, sr)
+                # if analysis_type in [AnalysisType.FULL, AnalysisType.EXPRESSION]:
+                #     result.expression = self.expression_analyzer.analyze(y, sr)
 
-            # if analysis_type in [AnalysisType.FULL, AnalysisType.FLEXIBILITY]:
-            #     result.flexibility = self.flexibility_analyzer.analyze(y, sr)
+                # if analysis_type in [AnalysisType.FULL, AnalysisType.FLEXIBILITY]:
+                #     result.flexibility = self.flexibility_analyzer.analyze(y, sr)
 
-            return result
+            return result, trumpet_detection
 
         except AudioProcessingError:
             raise

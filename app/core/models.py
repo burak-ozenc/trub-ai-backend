@@ -65,3 +65,10 @@ class QuestionResponse(BaseModel):
     question: str
     answer: str
     context_used: bool = Field(default=False, description="Whether audio context was used")
+
+class TrumpetDetectionResult(BaseModel):
+    is_trumpet: bool
+    confidence_score: float = Field(ge=0.0, le=1.0)
+    detection_features: Dict[str, Any]
+    warning_message: Optional[str] = None
+    recommendations: List[str] = []

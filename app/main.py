@@ -18,9 +18,9 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_credentials=settings.CORS_ALLOW_CREDENTIALS,
+    allow_methods=settings.CORS_ALLOW_METHODS,
+    allow_headers=settings.CORS_ALLOW_HEADERS,
 )
 
 # Include API routers
@@ -130,11 +130,12 @@ async def get_config():
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
     """Global exception handler for unhandled errors"""
+    return JSONResponse(status_code=500, content={"error": str(exc)})
     return JSONResponse(
         status_code=500,
         content={
             "message": "An unexpected error occurred",
-            "detail": str(exc) if settings.LOG_LEVEL == "DEBUG" else "Internal server error"
+            "detail": str(exc) if settings.LOG_LEVEL.lower() == "debug" else "Internal server error"
         }
     )
 
