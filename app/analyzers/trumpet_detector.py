@@ -220,12 +220,12 @@ class TrumpetDetector(BaseAnalyzer):
     def _calculate_confidence(self, features: Dict[str, Any]) -> float:
         """Calculate overall confidence using stricter scoring mechanism"""
 
-        # Critical features that MUST pass for trumpet detection
+        # Critical features that MUST pass for trumpet detection (REDUCED LIST)
         critical_features = [
             'energy_sufficient',
             'has_pitch_content',
-            'harmonic_sufficient',
-            'pitch_stable'
+            'harmonic_sufficient'
+            # Removed 'pitch_stable' temporarily until algorithm is fixed
         ]
 
         # Check if all critical features pass
@@ -246,10 +246,12 @@ class TrumpetDetector(BaseAnalyzer):
             'low_zcr': 0.05,
             'rolloff_sufficient': 0.05,
             'peaks_sufficient': 0.05,
-            'harmonic_series_valid': 0.1,
+            'harmonic_series_valid': 0.08,  # Reduced from 0.1
             'pitch_in_trumpet_range': 0.05,
             'has_tonal_content': 0.03,
-            'attack_sharp': 0.02  # Will be added by brass features
+            'attack_sharp': 0.04,  # Increased from 0.02
+            'spectral_consistent': 0.05,  # New bonus for spectral consistency
+            'pitch_stable': 0.05  # Bonus if it works, but not required
         }
 
         for feature, weight in bonus_features.items():
@@ -262,23 +264,22 @@ class TrumpetDetector(BaseAnalyzer):
         return base_confidence + bonus_score
 
     def _calculate_hybrid_confidence(self, features: Dict[str, Any]) -> float:
-        """Calculate confidence using both rule-based and ML approaches"""
+        """Calculate confidence - RULE-BASED ONLY (ML disabled)"""
 
-        # Get rule-based confidence
+        # ML disabled - use only rule-based confidence
+        if not settings.ML_ENABLED:
+            return self._calculate_confidence(features)
+
+        # Original hybrid code (not used when ML_ENABLED = False)
         rule_confidence = self._calculate_confidence(features)
-
-        # Get ML confidence if available
         ml_confidence = features.get('ml_confidence', 0.0)
         ml_available = features.get('ml_available', False)
 
-        if not ml_available or not settings.ML_ENABLED:
-            # Fall back to rule-based only
+        if not ml_available:
             return rule_confidence
 
-        # Hybrid approach: weighted combination
         ml_weight = settings.ML_CONFIDENCE_WEIGHT
         rule_weight = 1.0 - ml_weight
-
         hybrid_confidence = (ml_weight * ml_confidence) + (rule_weight * rule_confidence)
 
         return min(hybrid_confidence, 1.0)
@@ -354,25 +355,43 @@ class TrumpetDetector(BaseAnalyzer):
         return found_harmonics / len(expected_harmonics)
 
     def _calculate_pitch_stability(self, pitch_values: list) -> float:
-        """Calculate pitch stability (consistent pitch over time)"""
+        """Calculate pitch stability (consistent pitch over time) - FIXED VERSION"""
         if len(pitch_values) < 3:
             return 0.0
 
         pitch_array = np.array(pitch_values)
-        # Remove outliers (more than 2 std devs away)
-        std_dev = np.std(pitch_array)
-        mean_pitch = np.mean(pitch_array)
 
-        stable_pitches = pitch_array[np.abs(pitch_array - mean_pitch) <= 2 * std_dev]
+        # Filter out zero or very low pitches that might be detection errors
+        valid_pitches = pitch_array[pitch_array > 50.0]  # Remove very low frequencies
 
-        if len(stable_pitches) == 0:
+        if len(valid_pitches) < 3:
             return 0.0
 
-        # Calculate coefficient of variation (lower is more stable)
-        cv = np.std(stable_pitches) / np.mean(stable_pitches)
-        stability = max(0, 1 - cv * 5)  # Scale CV to 0-1 range
+        # Calculate basic statistics
+        mean_pitch = np.mean(valid_pitches)
+        std_pitch = np.std(valid_pitches)
 
-        return stability
+        if mean_pitch == 0:
+            return 0.0
+
+        # Calculate coefficient of variation (CV)
+        cv = std_pitch / mean_pitch
+
+        # Convert CV to stability score (lower CV = higher stability)
+        # CV of 0.1 (10% variation) = good stability
+        # CV of 0.5 (50% variation) = poor stability
+        stability = max(0.0, 1.0 - (cv * 2.0))  # Scale so CV=0.5 gives stability=0
+
+        # Additional check: if most pitches are within 20% of mean, boost stability
+        tolerance = mean_pitch * 0.2
+        stable_count = np.sum(np.abs(valid_pitches - mean_pitch) <= tolerance)
+        stable_ratio = stable_count / len(valid_pitches)
+
+        # Boost stability if high percentage of pitches are within tolerance
+        if stable_ratio > 0.7:
+            stability = min(1.0, stability + 0.2)
+
+        return float(stability)
 
     def _analyze_brass_characteristics(self, y: np.ndarray, sr: int) -> Dict[str, Any]:
         """Analyze brass-specific characteristics"""

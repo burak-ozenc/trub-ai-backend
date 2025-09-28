@@ -1,4 +1,5 @@
-﻿import os
+﻿#tinyllama:1.1b
+import os
 from typing import Optional
 
 class Settings:
@@ -60,8 +61,8 @@ class Settings:
     ML_MODEL_PATH: str = "app/ml/models/trumpet_classifier.pkl"
     ML_FEATURE_CACHE_DIR: str = "data/ml_features"
     ML_TRAINING_DATA_DIR: str = "data/ml_training"
-    ML_ENABLED: bool = True  # Enable/disable ML detection
-    ML_CONFIDENCE_WEIGHT: float = 0.4  # Lowered from 0.7 - ML model needs retraining
+    ML_ENABLED: bool = False  # DISABLED temporarily until model is retrained
+    ML_CONFIDENCE_WEIGHT: float = 0.4  # Not used when ML_ENABLED = False
 
     def __init__(self):
         # Ensure upload directory exists
