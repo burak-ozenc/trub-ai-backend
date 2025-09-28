@@ -26,7 +26,6 @@ class Settings:
     # CORS configuration
     CORS_ORIGINS: list = [
         "http://localhost:3000",      # React development server
-        "https://localhost:3000",      # React development server
         "http://127.0.0.1:3000",     # Alternative localhost
         "http://localhost:3001",      # Alternative React port
         "http://127.0.0.1:3001",     # Alternative localhost
@@ -56,6 +55,13 @@ class Settings:
 
     # Logging
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
+
+    # ML Model configuration
+    ML_MODEL_PATH: str = "app/ml/models/trumpet_classifier.pkl"
+    ML_FEATURE_CACHE_DIR: str = "data/ml_features"
+    ML_TRAINING_DATA_DIR: str = "data/ml_training"
+    ML_ENABLED: bool = True  # Enable/disable ML detection
+    ML_CONFIDENCE_WEIGHT: float = 0.4  # Lowered from 0.7 - ML model needs retraining
 
     def __init__(self):
         # Ensure upload directory exists

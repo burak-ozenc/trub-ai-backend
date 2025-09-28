@@ -3,15 +3,21 @@ import numpy as np
 from scipy import signal
 from typing import Dict, Any, List
 from app.analyzers.base_analyzer import BaseAnalyzer
+from app.analyzers.ml_trumpet_detector import MLTrumpetDetector
 from app.core.models import TrumpetDetectionResult
 from app.core import constants as const
+from app.config import settings
 
 class TrumpetDetector(BaseAnalyzer):
-    """Detector for identifying trumpet sounds in audio"""
+    """Hybrid detector combining rule-based and ML detection"""
+
+    def __init__(self):
+        super().__init__()
+        self.ml_detector = MLTrumpetDetector() if settings.ML_ENABLED else None
 
     def analyze(self, y: np.ndarray, sr: int) -> TrumpetDetectionResult:
         """
-        Detect if audio contains trumpet sounds
+        Detect if audio contains trumpet sounds using hybrid approach
         
         Args:
             y: Audio time series
@@ -36,8 +42,13 @@ class TrumpetDetector(BaseAnalyzer):
         # Extract features for trumpet detection
         features = self._extract_trumpet_features(y, sr)
 
-        # Calculate confidence score
-        confidence = self._calculate_confidence(features)
+        # Add ML detection if available
+        if self.ml_detector and self.ml_detector.is_available():
+            ml_results = self.ml_detector.analyze(y, sr)
+            features.update(ml_results)
+
+        # Calculate confidence score (hybrid approach)
+        confidence = self._calculate_hybrid_confidence(features)
 
         # Determine if it's a trumpet
         is_trumpet = confidence >= const.TRUMPET_DETECTION_CONFIDENCE_THRESHOLD
@@ -160,11 +171,15 @@ class TrumpetDetector(BaseAnalyzer):
                 'pitch_in_trumpet_range': False,
                 'average_pitch': 0.0,
                 'pitch_range': 0.0,
-                'trumpet_pitch_ratio': 0.0
+                'trumpet_pitch_ratio': 0.0,
+                'pitch_stability': 0.0
             }
 
         avg_pitch = np.mean(pitch_values)
         pitch_range = np.max(pitch_values) - np.min(pitch_values)
+
+        # Enhanced: Pitch stability analysis
+        pitch_stability = self._calculate_pitch_stability(pitch_values)
 
         # Check if pitches are in trumpet range
         trumpet_pitches = [p for p in pitch_values
@@ -172,11 +187,13 @@ class TrumpetDetector(BaseAnalyzer):
         pitch_in_range_ratio = len(trumpet_pitches) / len(pitch_values) if pitch_values else 0
 
         return {
-            'has_pitch_content': bool(len(pitch_values) > 0),
+            'has_pitch_content': True,
             'average_pitch': float(avg_pitch),
             'pitch_range': float(pitch_range),
+            'pitch_stability': float(pitch_stability),
             'pitch_in_trumpet_range': bool(pitch_in_range_ratio > 0.5),
-            'trumpet_pitch_ratio': float(pitch_in_range_ratio)
+            'trumpet_pitch_ratio': float(pitch_in_range_ratio),
+            'pitch_stable': bool(pitch_stability >= const.TRUMPET_PITCH_STABILITY_MIN)
         }
 
     def _analyze_spectral_shape(self, y: np.ndarray, sr: int) -> Dict[str, Any]:
@@ -244,6 +261,28 @@ class TrumpetDetector(BaseAnalyzer):
 
         return base_confidence + bonus_score
 
+    def _calculate_hybrid_confidence(self, features: Dict[str, Any]) -> float:
+        """Calculate confidence using both rule-based and ML approaches"""
+
+        # Get rule-based confidence
+        rule_confidence = self._calculate_confidence(features)
+
+        # Get ML confidence if available
+        ml_confidence = features.get('ml_confidence', 0.0)
+        ml_available = features.get('ml_available', False)
+
+        if not ml_available or not settings.ML_ENABLED:
+            # Fall back to rule-based only
+            return rule_confidence
+
+        # Hybrid approach: weighted combination
+        ml_weight = settings.ML_CONFIDENCE_WEIGHT
+        rule_weight = 1.0 - ml_weight
+
+        hybrid_confidence = (ml_weight * ml_confidence) + (rule_weight * rule_confidence)
+
+        return min(hybrid_confidence, 1.0)
+
     def _generate_feedback(self, features: Dict[str, Any], confidence: float, is_trumpet: bool) -> tuple[str, List[str]]:
         """Generate warning messages and recommendations"""
         recommendations = []
@@ -264,6 +303,13 @@ class TrumpetDetector(BaseAnalyzer):
                     "Ensure proper microphone placement",
                     "Check for background noise interference"
                 ])
+
+        # Show ML vs rule-based results if both available
+        ml_available = features.get('ml_available', False)
+        if ml_available:
+            ml_confidence = features.get('ml_confidence', 0.0)
+            if abs(ml_confidence - self._calculate_confidence(features)) > 0.2:
+                recommendations.append(f"Note: ML model confidence ({ml_confidence:.2f}) differs from acoustic analysis")
 
         # Specific feature-based recommendations
         if not features.get('energy_sufficient', False):

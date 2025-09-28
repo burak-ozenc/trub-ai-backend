@@ -56,7 +56,7 @@ async def comprehensive_analysis(
 
         # Save uploaded file
         file_path = await file_service.save_uploaded_file(audioData)
-
+        print("Analyzing the file",file_path)
         try:
             # Perform technical analysis with trumpet detection
             analysis_result, trumpet_detection = audio_processor.analyze_audio(file_path, analysis_enum)
