@@ -1,4 +1,4 @@
-# Trumpet Analyzer Backend
+# Trub-AI Backend
 
 AI-powered trumpet performance analysis and coaching system backend built with FastAPI.
 
