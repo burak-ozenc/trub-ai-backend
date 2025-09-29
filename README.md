@@ -108,13 +108,6 @@ app/
 └── ml/            # Machine learning components (future)
 ```
 
-## Contributing
-
-1. Follow the modular architecture pattern
-2. Add type hints and proper error handling
-3. Update tests for new features
-4. Keep complexity minimal (see RuleBook)
-
 ## License
 
 #TODO
