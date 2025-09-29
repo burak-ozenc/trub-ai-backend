@@ -30,7 +30,7 @@ AI-powered trumpet performance analysis and coaching system backend built with F
 ### Setup
 ```bash
 # Clone repository
-git clone [<repository-url>](https://github.com/burak-ozenc/trub-ai-backend)
+git clone https://github.com/burak-ozenc/trub-ai-backend
 cd trub-ai-backend
 
 # Create virtual environment
