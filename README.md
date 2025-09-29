@@ -52,7 +52,7 @@ mkdir -p data/ml_training/{trumpet,non_trumpet}
 
 # Set environment variables (optional)
 export UPLOAD_DIR=data/recordings
-export OLLAMA_MODEL=deepseek-r1:7b
+export OLLAMA_MODEL=tinyllama:1.1b
 ```
 
 ## Running the Server
