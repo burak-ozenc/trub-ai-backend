@@ -120,7 +120,7 @@ async def get_config():
             "tone_analysis": True,
             "llm_feedback": True,
             "question_answering": True,
-            "rhythm_analysis": False,  # TODO: implement
+            "rhythm_analysis": True, 
             "expression_analysis": False,  # TODO: implement
             "flexibility_analysis": False,  # TODO: implement
         }

@@ -2,10 +2,10 @@
 from app.utils.audio_utils import AudioPreprocessor
 from app.analyzers.breath_analyzer import BreathControlAnalyzer
 from app.analyzers.tone_analyzer import ToneAnalyzer
+from app.analyzers.rhythm_analyzer import RhythmAnalyzer
 from app.analyzers.trumpet_detector import TrumpetDetector
 from app.core.models import AudioAnalysisResult, AnalysisType, TrumpetDetectionResult
 from app.core.exceptions import AudioProcessingError, AnalysisError
-
 
 class AudioProcessorService:
     """Main service for orchestrating audio analysis"""
@@ -15,9 +15,9 @@ class AudioProcessorService:
         self.trumpet_detector = TrumpetDetector()
         self.breath_analyzer = BreathControlAnalyzer()
         self.tone_analyzer = ToneAnalyzer()
+        self.rhythm_analyzer = RhythmAnalyzer()
 
-    def analyze_audio(self, file_path: str, analysis_type: AnalysisType = AnalysisType.FULL) -> tuple[
-        AudioAnalysisResult, TrumpetDetectionResult]:
+    def analyze_audio(self, file_path: str, analysis_type: AnalysisType = AnalysisType.FULL) -> tuple[AudioAnalysisResult, TrumpetDetectionResult]:
         """
         Main method to analyze audio file with trumpet detection
         
@@ -34,8 +34,6 @@ class AudioProcessorService:
 
             # Step 1: Detect if this is actually a trumpet
             trumpet_detection = self.trumpet_detector.analyze(y, sr)
-            
-            print("Checking trumpet detection :", trumpet_detection)
 
             # Initialize result
             result = AudioAnalysisResult()
@@ -49,10 +47,10 @@ class AudioProcessorService:
                 if analysis_type in [AnalysisType.FULL, AnalysisType.TONE]:
                     result.tone_quality = self.tone_analyzer.analyze(y, sr)
 
-                # TODO: Add other analyzers as they're implemented
-                # if analysis_type in [AnalysisType.FULL, AnalysisType.RHYTHM]:
-                #     result.rhythm_timing = self.rhythm_analyzer.analyze(y, sr)
+                if analysis_type in [AnalysisType.FULL, AnalysisType.RHYTHM]:
+                    result.rhythm_timing = self.rhythm_analyzer.analyze(y, sr)
 
+                # TODO: Add other analyzers as they're implemented
                 # if analysis_type in [AnalysisType.FULL, AnalysisType.EXPRESSION]:
                 #     result.expression = self.expression_analyzer.analyze(y, sr)
 
