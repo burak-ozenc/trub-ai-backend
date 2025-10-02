@@ -1,7 +1,7 @@
-﻿from pydantic import BaseModel, Field
+﻿from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, Dict, Any, List
 from enum import Enum
-
+from datetime import datetime
 
 class AnalysisType(str, Enum):
     FULL = "full"
@@ -11,17 +11,14 @@ class AnalysisType(str, Enum):
     EXPRESSION = "expression"
     FLEXIBILITY = "flexibility"
 
-
 class AudioAnalysisRequest(BaseModel):
     guidance: str = Field(..., description="User's question or guidance text")
     analysis_type: AnalysisType = Field(default=AnalysisType.FULL, description="Type of analysis to perform")
-
 
 class BreathInterval(BaseModel):
     start_time: float
     end_time: float
     duration: float
-
 
 class BreathAnalysisResult(BaseModel):
     breath_intervals: List[BreathInterval]
@@ -30,18 +27,15 @@ class BreathAnalysisResult(BaseModel):
     recommendations: str
     breath_count: int
 
-
 class ToneAnalysisResult(BaseModel):
     harmonic_ratio: float
     quality_score: str
     recommendations: str
 
-
 class RhythmAnalysisResult(BaseModel):
     tempo: float
     consistency: str
     recommendations: str
-
 
 class RhythmAnalysisResult(BaseModel):
     tempo: float
@@ -50,18 +44,15 @@ class RhythmAnalysisResult(BaseModel):
     beat_strength: float
     timing_deviation: float
 
-
 class ExpressionAnalysisResult(BaseModel):
     dynamic_range: float
     expression_level: str
     recommendations: str
 
-
 class FlexibilityAnalysisResult(BaseModel):
     transition_smoothness: float
     flexibility_level: str
     recommendations: str
-
 
 class AudioAnalysisResult(BaseModel):
     breath_control: Optional[BreathAnalysisResult] = None
@@ -70,23 +61,49 @@ class AudioAnalysisResult(BaseModel):
     expression: Optional[ExpressionAnalysisResult] = None
     flexibility: Optional[FlexibilityAnalysisResult] = None
 
-
 class LLMResponse(BaseModel):
     feedback: str
     technical_analysis: Dict[str, Any]
     recommendations: List[str]
 
-
 class QuestionRequest(BaseModel):
     question: str = Field(..., description="User's question about trumpet technique")
-
 
 class QuestionResponse(BaseModel):
     question: str
     answer: str
     context_used: bool = Field(default=False, description="Whether audio context was used")
 
+# Auth Models
+class UserBase(BaseModel):
+    email: EmailStr
+    username: str
+    full_name: Optional[str] = None
 
+class UserCreate(UserBase):
+    password: str = Field(..., min_length=8)
+
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+class UserResponse(UserBase):
+    id: int
+    is_active: bool
+    created_at: datetime
+    skill_level: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
+
+# Trumpet Detection Models
 class TrumpetDetectionResult(BaseModel):
     is_trumpet: bool
     confidence_score: float = Field(ge=0.0, le=1.0)

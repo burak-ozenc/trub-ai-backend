@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 import uvicorn
 
 from app.config import settings
-from app.api.endpoints import audio, analysis, llm
+from app.api.endpoints import audio, analysis, llm, auth, users
 from app.api.dependencies import check_ollama_connection, check_upload_directory
 
 # Initialize FastAPI app
@@ -120,7 +120,7 @@ async def get_config():
             "tone_analysis": True,
             "llm_feedback": True,
             "question_answering": True,
-            "rhythm_analysis": True, 
+            "rhythm_analysis": True,  
             "expression_analysis": False,  # TODO: implement
             "flexibility_analysis": False,  # TODO: implement
         }
@@ -130,12 +130,11 @@ async def get_config():
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
     """Global exception handler for unhandled errors"""
-    return JSONResponse(status_code=500, content={"error": str(exc)})
     return JSONResponse(
         status_code=500,
         content={
             "message": "An unexpected error occurred",
-            "detail": str(exc) if settings.LOG_LEVEL.lower() == "debug" else "Internal server error"
+            "detail": str(exc) if settings.LOG_LEVEL == "DEBUG" else "Internal server error"
         }
     )
 
