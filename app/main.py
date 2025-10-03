@@ -17,7 +17,7 @@ app = FastAPI(
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=['*'],
     allow_credentials=settings.CORS_ALLOW_CREDENTIALS,
     allow_methods=settings.CORS_ALLOW_METHODS,
     allow_headers=settings.CORS_ALLOW_HEADERS,
@@ -27,6 +27,7 @@ app.add_middleware(
 app.include_router(audio.router)
 app.include_router(analysis.router)
 app.include_router(llm.router)
+app.include_router(auth.router)
 
 # TODO-Idea List (embedded in main for reference)
 """

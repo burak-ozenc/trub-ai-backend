@@ -60,7 +60,7 @@ class Settings:
     # Database configuration
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL",
-        "postgresql://postgres:postgres@localhost:5432/trumpet_analyzer"
+        "postgresql://postgres:admin@localhost:5432/trumpet_analyzer"
     )
 
     # Authentication
