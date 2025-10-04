@@ -31,6 +31,7 @@ class LLMService:
             from app.services.audio_processor import AudioProcessorService
             processor = AudioProcessorService()
             technical_data = processor.extract_technical_data(analysis_result)
+            print("technical_data", technical_data)
 
             # Create structured prompt
             prompt = self._create_comprehensive_prompt(technical_data, user_question)

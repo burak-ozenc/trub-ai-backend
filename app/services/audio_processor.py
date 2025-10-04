@@ -3,9 +3,12 @@ from app.utils.audio_utils import AudioPreprocessor
 from app.analyzers.breath_analyzer import BreathControlAnalyzer
 from app.analyzers.tone_analyzer import ToneAnalyzer
 from app.analyzers.rhythm_analyzer import RhythmAnalyzer
+from app.analyzers.expression_analyzer import ExpressionAnalyzer
+from app.analyzers.flexibility_analyzer import FlexibilityAnalyzer
 from app.analyzers.trumpet_detector import TrumpetDetector
 from app.core.models import AudioAnalysisResult, AnalysisType, TrumpetDetectionResult
 from app.core.exceptions import AudioProcessingError, AnalysisError
+
 
 class AudioProcessorService:
     """Main service for orchestrating audio analysis"""
@@ -16,8 +19,11 @@ class AudioProcessorService:
         self.breath_analyzer = BreathControlAnalyzer()
         self.tone_analyzer = ToneAnalyzer()
         self.rhythm_analyzer = RhythmAnalyzer()
+        self.expression_analyzer = ExpressionAnalyzer()
+        self.flexibility_analyzer = FlexibilityAnalyzer()
 
-    def analyze_audio(self, file_path: str, analysis_type: AnalysisType = AnalysisType.FULL) -> tuple[AudioAnalysisResult, TrumpetDetectionResult]:
+    def analyze_audio(self, file_path: str, analysis_type: AnalysisType = AnalysisType.FULL) -> tuple[
+        AudioAnalysisResult, TrumpetDetectionResult]:
         """
         Main method to analyze audio file with trumpet detection
         
@@ -50,12 +56,11 @@ class AudioProcessorService:
                 if analysis_type in [AnalysisType.FULL, AnalysisType.RHYTHM]:
                     result.rhythm_timing = self.rhythm_analyzer.analyze(y, sr)
 
-                # TODO: Add other analyzers as they're implemented
-                # if analysis_type in [AnalysisType.FULL, AnalysisType.EXPRESSION]:
-                #     result.expression = self.expression_analyzer.analyze(y, sr)
+                if analysis_type in [AnalysisType.FULL, AnalysisType.EXPRESSION]:
+                    result.expression = self.expression_analyzer.analyze(y, sr)
 
-                # if analysis_type in [AnalysisType.FULL, AnalysisType.FLEXIBILITY]:
-                #     result.flexibility = self.flexibility_analyzer.analyze(y, sr)
+                if analysis_type in [AnalysisType.FULL, AnalysisType.FLEXIBILITY]:
+                    result.flexibility = self.flexibility_analyzer.analyze(y, sr)
 
             return result, trumpet_detection
 
@@ -87,9 +92,31 @@ class AudioProcessorService:
         if analysis_result.tone_quality:
             technical_data["tone_analysis"] = {
                 "harmonic_ratio": analysis_result.tone_quality.harmonic_ratio,
-                "quality_assessment": analysis_result.tone_quality.quality_score
+                "quality_assessment": analysis_result.tone_quality.quality_score,
+                "recommendations": analysis_result.tone_quality.recommendations
             }
 
-        # TODO: Add other analysis results as they're implemented
+        if analysis_result.rhythm_timing:
+            technical_data["rhythm_timing"] = {
+                "tempo": analysis_result.rhythm_timing.tempo,
+                "consistency": analysis_result.rhythm_timing.consistency,
+                "beat_strength": analysis_result.rhythm_timing.beat_strength,
+                "timing_deviation": analysis_result.rhythm_timing.timing_deviation,
+                "recommendations": analysis_result.rhythm_timing.recommendations
+            }
+
+        if analysis_result.expression:
+            technical_data["expression"] = {
+                "dynamic_range": analysis_result.expression.dynamic_range,
+                "expression_level": analysis_result.expression.expression_level,
+                "recommendations": analysis_result.expression.recommendations
+            }
+
+        if analysis_result.flexibility:
+            technical_data["flexibility"] = {
+                "transition_smoothness": analysis_result.flexibility.transition_smoothness,
+                "flexibility_level": analysis_result.flexibility.flexibility_level,
+                "recommendations": analysis_result.flexibility.recommendations
+            }
 
         return technical_data

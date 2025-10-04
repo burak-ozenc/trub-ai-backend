@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 import uvicorn
 
 from app.config import settings
-from app.api.endpoints import audio, analysis, llm, auth, users
+from app.api.endpoints import audio, analysis, llm, auth, users, recordings
 from app.api.dependencies import check_ollama_connection, check_upload_directory
 
 # Initialize FastAPI app
@@ -28,6 +28,8 @@ app.include_router(audio.router)
 app.include_router(analysis.router)
 app.include_router(llm.router)
 app.include_router(auth.router)
+app.include_router(users.router)
+app.include_router(recordings.router)
 
 # TODO-Idea List (embedded in main for reference)
 """
