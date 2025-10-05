@@ -54,40 +54,38 @@ async def comprehensive_analysis(
                 detail=f"Invalid analysis type. Must be one of: {[t.value for t in AnalysisType]}"
             )
 
-        # Save uploaded file
+        # Save uploaded file (KEEP THE FILE for playback later)
         file_path = await file_service.save_uploaded_file(audioData)
-        print("Analyzing the file",file_path)
-        try:
-            # Perform technical analysis with trumpet detection
-            analysis_result, trumpet_detection = audio_processor.analyze_audio(file_path, analysis_enum)
-            print("trumpet_detection.is_trumpet",trumpet_detection.is_trumpet)
-            # Check if trumpet was detected
-            if not trumpet_detection.is_trumpet:
-                return {
-                    "error": "No trumpet detected",
-                    "detection_result": trumpet_detection.dict(),
-                    "message": trumpet_detection.warning_message or "Please ensure you're playing a trumpet and try again.",
-                    "recommendations": trumpet_detection.recommendations,
-                    "file_path": file_path
-                }
+        print("Analyzing the file", file_path)
 
-            # Proceed with LLM feedback only if trumpet detected
-            llm_response = await llm_service.get_comprehensive_feedback(analysis_result, guidance)
+        # Perform technical analysis with trumpet detection
+        analysis_result, trumpet_detection = audio_processor.analyze_audio(file_path, analysis_enum)
+        print("trumpet_detection.is_trumpet", trumpet_detection.is_trumpet)
 
+        # Check if trumpet was detected
+        if not trumpet_detection.is_trumpet:
+            # Clean up file if not a trumpet
+            file_service.cleanup_file(file_path)
             return {
-                "feedback": llm_response.feedback,
-                "technical_analysis": llm_response.technical_analysis,
-                "recommendations": llm_response.recommendations,
+                "error": "No trumpet detected",
                 "detection_result": trumpet_detection.dict(),
-                "analysis_type": analysis_type,
-                "user_question": guidance,
-                "file_path": file_path
+                "message": trumpet_detection.warning_message or "Please ensure you're playing a trumpet and try again.",
+                "recommendations": trumpet_detection.recommendations,
+                "file_path": None  # No file saved for non-trumpet audio
             }
 
-        finally:
-            # Optional: cleanup file after processing
-            # file_service.cleanup_file(file_path)
-            pass
+        # Proceed with LLM feedback only if trumpet detected
+        llm_response = await llm_service.get_comprehensive_feedback(analysis_result, guidance)
+
+        return {
+            "feedback": llm_response.feedback,
+            "technical_analysis": llm_response.technical_analysis,
+            "recommendations": llm_response.recommendations,
+            "detection_result": trumpet_detection.dict(),
+            "analysis_type": analysis_type,
+            "user_question": guidance,
+            "file_path": file_path  # Return file path for database storage
+        }
 
     except FileProcessingError as e:
         raise HTTPException(status_code=400, detail=str(e))

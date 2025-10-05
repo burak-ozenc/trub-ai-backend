@@ -130,6 +130,7 @@ class RecordingCreate(BaseModel):
     analysis_type: str = "full"
     duration: Optional[float] = None
     analysis_results: Dict[str, Any]
+    audio_file_path: Optional[str] = None  # NEW - Path to audio file
 
 
 class RecordingResponse(BaseModel):
@@ -140,6 +141,7 @@ class RecordingResponse(BaseModel):
     analysis_type: str
     duration: Optional[float]
     analysis_results: Dict[str, Any]
+    audio_file_path: Optional[str]  # NEW - Path to audio file
     created_at: datetime
 
     class Config:
