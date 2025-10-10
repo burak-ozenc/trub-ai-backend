@@ -140,3 +140,81 @@ async def get_recording_stats(
     """Get recording statistics for current user"""
     count = crud.get_recording_count(db, current_user.id)
     return {"total_recordings": count}
+
+
+@router.get("/stats/progress")
+async def get_progress_stats(
+        current_user = Depends(get_current_user),
+        db: Session = Depends(get_db)
+):
+    """Get progress statistics and trends for current user"""
+    recordings = crud.get_user_recordings(db, current_user.id, skip=0, limit=100)
+
+    if not recordings:
+        return {
+            "total_recordings": 0,
+            "total_practice_time": 0,
+            "trends": [],
+            "averages": {},
+            "latest_scores": {}
+        }
+
+    # Calculate trends over time
+    trends = []
+    for recording in recordings:
+        analysis = recording.analysis_results or {}
+
+        # Extract scores from analysis
+        breath = analysis.get('breath_control', {})
+        tone = analysis.get('tone_quality', {})
+        rhythm = analysis.get('rhythm_timing', {})
+        expression = analysis.get('expression', {})
+        flexibility = analysis.get('flexibility', {})
+
+        trend_point = {
+            "date": recording.created_at.isoformat(),
+            "breath_score": _extract_score(breath),
+            "tone_score": _extract_score(tone),
+            "rhythm_score": rhythm.get('timing_deviation', 0) if rhythm else 0,
+            "expression_score": expression.get('dynamic_range', 0) if expression else 0,
+            "flexibility_score": flexibility.get('transition_smoothness', 0) if flexibility else 0,
+        }
+        trends.append(trend_point)
+
+    # Calculate averages
+    total = len(recordings)
+    avg_breath = sum(t['breath_score'] for t in trends) / total if total > 0 else 0
+    avg_tone = sum(t['tone_score'] for t in trends) / total if total > 0 else 0
+    avg_rhythm = sum(t['rhythm_score'] for t in trends) / total if total > 0 else 0
+
+    # Get latest scores
+    latest = trends[0] if trends else {}
+
+    # Calculate total practice time (estimate)
+    total_time = sum(r.duration or 0 for r in recordings)
+
+    return {
+        "total_recordings": total,
+        "total_practice_time": round(total_time, 2),
+        "trends": list(reversed(trends)),  # Oldest to newest for charts
+        "averages": {
+            "breath": round(avg_breath, 2),
+            "tone": round(avg_tone, 2),
+            "rhythm": round(avg_rhythm, 2)
+        },
+        "latest_scores": latest
+    }
+
+
+def _extract_score(analysis_section: dict) -> float:
+    """Extract a numeric score from analysis section"""
+    if not analysis_section:
+        return 0.0
+
+    # Try to find numeric values
+    if 'average_breath_length' in analysis_section:
+        return min(analysis_section['average_breath_length'], 10.0)
+    if 'harmonic_ratio' in analysis_section:
+        return analysis_section['harmonic_ratio'] * 10
+
+    return 0.0
