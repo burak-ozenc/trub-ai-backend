@@ -39,4 +39,5 @@ class Recording(Base):
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+    audio_file_path = Column(String(50), nullable=False)
     # Note: Audio files stored separately (file storage or S3), not in DB

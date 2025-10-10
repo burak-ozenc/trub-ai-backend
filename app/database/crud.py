@@ -56,11 +56,12 @@ def update_user(db: Session, user_id: int, **kwargs) -> Optional[User]:
 # Recording CRUD operations
 def create_recording(db: Session, user_id: int, filename: str, guidance: str,
                      analysis_results: dict, analysis_type: str = "full",
-                     duration: float = None) -> Recording:
+                     duration: float = None, audio_file_path: str = None) -> Recording:
     """Create new recording for a user"""
     recording = Recording(
         user_id=user_id,
         filename=filename,
+        audio_file_path=audio_file_path,  # NEW - Store audio file path
         guidance=guidance,
         analysis_type=analysis_type,
         duration=duration,

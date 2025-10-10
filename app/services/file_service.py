@@ -1,6 +1,6 @@
 ﻿import os
 import uuid
-from typing import BinaryIO
+from typing import Optional
 from fastapi import UploadFile
 from app.config import settings
 from app.core.exceptions import FileProcessingError
@@ -42,6 +42,73 @@ class FileService:
             raise
         except Exception as e:
             raise FileProcessingError(f"Failed to save file: {str(e)}")
+
+    async def save_audio_file(self, audio_data: bytes, filename: Optional[str] = None) -> str:
+        """
+        Save audio file to disk
+        
+        Args:
+            audio_data: Audio file bytes
+            filename: Optional filename (will generate if not provided)
+            
+        Returns:
+            Full path to saved file
+        """
+        try:
+            # Generate or clean filename
+            if not filename:
+                filename = self._generate_filename()
+            else:
+                filename = self._generate_filename(filename)
+
+            file_path = os.path.join(self.upload_dir, filename)
+
+            # Check file size
+            if len(audio_data) > self.max_file_size:
+                raise FileProcessingError(f"File too large: {len(audio_data)} bytes (max: {self.max_file_size})")
+
+            # Save file
+            with open(file_path, "wb") as f:
+                f.write(audio_data)
+
+            return file_path
+
+        except FileProcessingError:
+            raise
+        except Exception as e:
+            raise FileProcessingError(f"Failed to save audio file: {str(e)}")
+
+    def get_audio_file(self, file_path: str) -> Optional[bytes]:
+        """
+        Retrieve audio file from disk
+        
+        Args:
+            file_path: Path to audio file
+            
+        Returns:
+            Audio file bytes or None if not found
+        """
+        try:
+            if not os.path.exists(file_path):
+                return None
+
+            with open(file_path, "rb") as f:
+                return f.read()
+        except Exception as e:
+            print(f"Error reading audio file {file_path}: {e}")
+            return None
+
+    def file_exists(self, file_path: str) -> bool:
+        """
+        Check if file exists
+        
+        Args:
+            file_path: Path to file
+            
+        Returns:
+            True if exists, False otherwise
+        """
+        return os.path.exists(file_path)
 
     def _generate_filename(self, original_filename: str = None) -> str:
         """
