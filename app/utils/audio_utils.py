@@ -27,7 +27,7 @@ class AudioPreprocessor:
         temp_path = None
         try:
             # Retrieve file bytes using the existing file service
-            file_bytes = self.file_service.get_audio_file(file_path)
+            file_bytes = self.FileService.get_audio_file(file_path)
             if not file_bytes:
                 raise AudioProcessingError(f"Could not retrieve audio file: {file_path}")
 
