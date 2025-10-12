@@ -30,7 +30,7 @@ class Settings:
 
     # LLM configuration - Google AI Studio (Gemini)
     GOOGLE_AI_API_KEY: str = os.getenv("GOOGLE_AI_API_KEY", "")
-    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-2.0-flash-exp")
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
     LLM_TIMEOUT: int = int(os.getenv("LLM_TIMEOUT", "60"))
 
     # Legacy Ollama settings (for backwards compatibility)
