@@ -44,16 +44,16 @@ class LLMService:
             print("technical_data", technical_data)
 
             # Create structured prompt
-            prompt = self._create_comprehensive_prompt(technical_data, user_question)
-
-            # Get Gemini response
-            response = self.model.generate_content(prompt)
-            feedback_text = response.text
+            # prompt = self._create_comprehensive_prompt(technical_data, user_question)
+            # 
+            # # Get Gemini response
+            # response = self.model.generate_content(prompt)
+            # feedback_text = response.text
 
             return LLMResponse(
-                feedback=feedback_text,
+                feedback=technical_data,
                 technical_analysis=technical_data,
-                recommendations=self._extract_recommendations(feedback_text)
+                recommendations=self._extract_recommendations(technical_data)
             )
 
         except Exception as e:
