@@ -43,17 +43,9 @@ class Settings:
     # CORS configuration - Support environment variable for production
     CORS_ORIGINS: List[str] = os.getenv(
         "CORS_ORIGINS",
-        "https://trub-ai.netlify.app,http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001,http://localhost:5173,http://127.0.0.1:5173,http://localhost:8080,http://127.0.0.1:8080"
+        "*"
     ).split(",") if isinstance(os.getenv("CORS_ORIGINS"), str) else [
-        "https://trub-ai.netlify.app",
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:3001",
-        "http://127.0.0.1:3001",
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:8080",
-        "http://127.0.0.1:8080",
+        "*",
     ]
 
     CORS_ALLOW_CREDENTIALS: bool = True
