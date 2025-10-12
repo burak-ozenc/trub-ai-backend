@@ -43,8 +43,9 @@ class Settings:
     # CORS configuration - Support environment variable for production
     CORS_ORIGINS: List[str] = os.getenv(
         "CORS_ORIGINS",
-        "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001,http://localhost:5173,http://127.0.0.1:5173,http://localhost:8080,http://127.0.0.1:8080"
+        "https://provincial-avrit-at-it-8949d5c5.koyeb.app,http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001,http://localhost:5173,http://127.0.0.1:5173,http://localhost:8080,http://127.0.0.1:8080"
     ).split(",") if isinstance(os.getenv("CORS_ORIGINS"), str) else [
+        "https://provincial-avrit-at-it-8949d5c5.koyeb.app",
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "http://localhost:3001",
