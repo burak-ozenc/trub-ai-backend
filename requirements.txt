@@ -37,3 +37,4 @@ requests==2.31.0
 
 # Validation
 pydantic==2.5.0
+email-validator==2.1.0
