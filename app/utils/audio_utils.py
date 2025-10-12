@@ -40,7 +40,7 @@ class AudioPreprocessor:
                 warnings.simplefilter("ignore")
 
                 # Load audio from temp file
-                y, sr = librosa.load(temp_path, sr=self.sample_rate)
+                y, sr = librosa.load(temp_path, sr=settings.AUDIO_SAMPLE_RATE)
 
                 # Apply preprocessing pipeline
                 y_processed = self._preprocess_pipeline(y, sr)
