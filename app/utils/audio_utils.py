@@ -10,7 +10,7 @@ from scipy.signal import butter, filtfilt
 import noisereduce as nr
 from app.config import settings
 from app.core.exceptions import AudioProcessingError
-from app.services.file_service import FileService 
+from app.services.file_service import FileService
 
 
 class AudioPreprocessor:
@@ -27,7 +27,7 @@ class AudioPreprocessor:
         temp_path = None
         try:
             # Retrieve file bytes using the existing file service
-            file_bytes = self.FileService.get_audio_file(file_path)
+            file_bytes = FileService.get_audio_file(file_path)
             if not file_bytes:
                 raise AudioProcessingError(f"Could not retrieve audio file: {file_path}")
 
