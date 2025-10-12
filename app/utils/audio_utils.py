@@ -1,5 +1,6 @@
 ﻿import os
 import tempfile
+from typing import Optional
 
 import librosa
 import numpy as np
@@ -10,7 +11,6 @@ from scipy.signal import butter, filtfilt
 import noisereduce as nr
 from app.config import settings
 from app.core.exceptions import AudioProcessingError
-from app.services.file_service import FileService
 
 
 class AudioPreprocessor:
@@ -27,7 +27,7 @@ class AudioPreprocessor:
         temp_path = None
         try:
             # Retrieve file bytes using the existing file service
-            file_bytes = FileService.get_audio_file(file_path)
+            file_bytes = self.get_audio_file(file_path)
             if not file_bytes:
                 raise AudioProcessingError(f"Could not retrieve audio file: {file_path}")
 
@@ -171,3 +171,31 @@ class AudioPreprocessor:
         except Exception as e:
             print(f"Signal enhancement warning: {e}")
             return y  # Return original if enhancement fails
+
+    def get_audio_file(self, file_path: str) -> Optional[bytes]:
+        """
+        Retrieve audio file from Cloudinary URL or local disk
+        
+        Args:
+            file_path: Cloudinary URL or local file path
+            
+        Returns:
+            Audio file bytes or None if not found
+        """
+        try:
+            # Check if it's a URL (Cloudinary)
+            if file_path.startswith(('http://', 'https://')):
+                import requests
+                response = requests.get(file_path)
+                if response.status_code == 200:
+                    return response.content
+                return None
+            else:
+                # Local file
+                if not os.path.exists(file_path):
+                    return None
+                with open(file_path, "rb") as f:
+                    return f.read()
+        except Exception as e:
+            print(f"Error reading audio file {file_path}: {e}")
+            return None
