@@ -1,4 +1,5 @@
 ﻿import os
+import re
 import uuid
 import tempfile
 from typing import Optional
@@ -219,23 +220,23 @@ class FileService:
         """
         try:
             # Check if it's a Cloudinary URL
-            if file_path.startswith(('http://', 'https://')) and self.use_cloudinary:
-                # Extract public_id from Cloudinary URL
-                # URL format: https://res.cloudinary.com/{cloud_name}/video/upload/v{version}/{folder}/{public_id}.wav
-                parts = file_path.split('/')
-                if len(parts) > 0:
-                    # Get public_id with folder
-                    public_id_with_ext = '/'.join(parts[-2:])  # folder/filename.wav
-                    public_id = os.path.splitext(public_id_with_ext)[0]  # Remove extension
-
-                    # Delete from Cloudinary
-                    cloudinary.uploader.destroy(
-                        public_id,
-                        resource_type="video"
-                    )
-                    return True
+            if file_path.startswith(("http://", "https://")) and self.use_cloudinary:
+                # Match Cloudinary URLs like:
+                # https://res.cloudinary.com/<cloud_name>/<resource_type>/upload/v<version>/<public_id>.<ext>
+                match = re.search(r"/upload/(?:v\d+/)?(.+?)\.[a-zA-Z0-9]+$", file_path)
+                if match:
+                    public_id = match.group(1)  # <- e.g. "audio_bcbd53dfc12248e6943d0b5544336958"
+                    try:
+                        cloudinary.uploader.destroy(public_id, resource_type="video")
+                        return True
+                    except Exception as e:
+                        print("Cloudinary delete failed:", e)
+                        return False
+                else:
+                    print("Could not parse public_id from URL:", file_path)
+                    return False
             else:
-                # Local file
+            # Local file case
                 if os.path.exists(file_path):
                     os.remove(file_path)
                     return True
