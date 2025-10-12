@@ -1,10 +1,16 @@
-﻿import librosa
+﻿import os
+import tempfile
+
+import librosa
 import numpy as np
 import warnings
+
+from fastapi import requests
 from scipy.signal import butter, filtfilt
 import noisereduce as nr
 from app.config import settings
 from app.core.exceptions import AudioProcessingError
+from app.services.file_service import FileService 
 
 
 class AudioPreprocessor:
@@ -16,20 +22,25 @@ class AudioPreprocessor:
 
     def load_and_preprocess(self, file_path: str) -> tuple[np.ndarray, int]:
         """
-        Load audio file and apply preprocessing pipeline
-        
-        Args:
-            file_path: Path to audio file
-            
-        Returns:
-            Tuple of (processed_audio, sample_rate)
+        Load audio file (local or remote via Cloudinary) and apply preprocessing pipeline.
         """
+        temp_path = None
         try:
+            # Retrieve file bytes using the existing file service
+            file_bytes = self.file_service.get_audio_file(file_path)
+            if not file_bytes:
+                raise AudioProcessingError(f"Could not retrieve audio file: {file_path}")
+
+            # Write bytes to a temporary file so librosa can read it
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".ogg") as tmp:
+                tmp.write(file_bytes)
+                temp_path = tmp.name
+
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
 
-                # Load audio
-                y, sr = librosa.load(file_path, sr=settings.AUDIO_SAMPLE_RATE)
+                # Load audio from temp file
+                y, sr = librosa.load(temp_path, sr=self.sample_rate)
 
                 # Apply preprocessing pipeline
                 y_processed = self._preprocess_pipeline(y, sr)
@@ -38,6 +49,11 @@ class AudioPreprocessor:
 
         except Exception as e:
             raise AudioProcessingError(f"Failed to load and preprocess audio: {str(e)}")
+
+        finally:
+            # Clean up temporary file
+            if temp_path and os.path.exists(temp_path):
+                os.remove(temp_path)
 
     def _preprocess_pipeline(self, y: np.ndarray, sr: int) -> np.ndarray:
         """Apply complete preprocessing pipeline"""
