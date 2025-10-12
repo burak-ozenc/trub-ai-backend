@@ -2,6 +2,7 @@
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import uvicorn
+import os
 
 from app.config import settings
 from app.api.endpoints import audio, analysis, llm, auth, users, recordings
@@ -17,7 +18,7 @@ app = FastAPI(
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['*'],
+    allow_origins=settings.CORS_ORIGINS,  # Now uses environment variable
     allow_credentials=settings.CORS_ALLOW_CREDENTIALS,
     allow_methods=settings.CORS_ALLOW_METHODS,
     allow_headers=settings.CORS_ALLOW_HEADERS,
@@ -73,7 +74,6 @@ async def health_check():
     
     Checks:
     - Basic API functionality
-    - Ollama LLM service connection
     - Upload directory accessibility
     """
     health_status = {
@@ -81,12 +81,6 @@ async def health_check():
         "service": settings.API_TITLE,
         "version": settings.API_VERSION,
         "checks": {}
-    }
-
-    # Check Ollama connection
-    health_status["checks"]["ollama"] = {
-        "status": "healthy" if check_ollama_connection() else "unhealthy",
-        "model": settings.OLLAMA_MODEL
     }
 
     # Check upload directory
@@ -123,9 +117,9 @@ async def get_config():
             "tone_analysis": True,
             "llm_feedback": True,
             "question_answering": True,
-            "rhythm_analysis": True,  
-            "expression_analysis": False,  # TODO: implement
-            "flexibility_analysis": False,  # TODO: implement
+            "rhythm_analysis": True,
+            "expression_analysis": True,
+            "flexibility_analysis": True,
         }
     }
 
@@ -142,10 +136,12 @@ async def global_exception_handler(request, exc):
     )
 
 if __name__ == "__main__":
+    # Get port from environment variable (Koyeb sets this)
+    port = int(os.getenv("PORT", 8000))
+
     uvicorn.run(
         "app.main:app",
         host="0.0.0.0",
-        port=8000,
-        reload=True,
+        port=port,
         log_level=settings.LOG_LEVEL.lower()
     )

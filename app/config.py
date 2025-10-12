@@ -1,6 +1,5 @@
-﻿#tinyllama:1.1b
-import os
-from typing import Optional
+﻿import os
+from typing import Optional, List
 
 class Settings:
     # File handling
@@ -24,17 +23,21 @@ class Settings:
     API_TITLE: str = "Trumpet Analyzer API"
     API_VERSION: str = "1.0.0"
 
-    # CORS configuration
-    CORS_ORIGINS: list = [
-        "http://localhost:3000",      # React development server
-        "http://127.0.0.1:3000",     # Alternative localhost
-        "http://localhost:3001",      # Alternative React port
-        "http://127.0.0.1:3001",     # Alternative localhost
-        "http://localhost:5173",      # Vite development server
-        "http://127.0.0.1:5173",     # Alternative Vite
-        "http://localhost:8080",      # Alternative development port
-        "http://127.0.0.1:8080",     # Alternative localhost
+    # CORS configuration - Support environment variable for production
+    CORS_ORIGINS: List[str] = os.getenv(
+        "CORS_ORIGINS",
+        "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001,http://localhost:5173,http://127.0.0.1:5173,http://localhost:8080,http://127.0.0.1:8080"
+    ).split(",") if isinstance(os.getenv("CORS_ORIGINS"), str) else [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3001",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:8080",
+        "http://127.0.0.1:8080",
     ]
+
     CORS_ALLOW_CREDENTIALS: bool = True
     CORS_ALLOW_METHODS: list = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
     CORS_ALLOW_HEADERS: list = [
@@ -50,7 +53,6 @@ class Settings:
         "Cache-Control",
         "X-Mx-ReqToken",
         "Keep-Alive",
-        "X-Requested-With",
         "If-Modified-Since",
     ]
 

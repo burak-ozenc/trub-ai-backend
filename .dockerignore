@@ -1,0 +1,63 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Data (don't include in image)
+data/recordings/*
+data/ml_training/*
+data/ml_features/*
+
+# Keep directory structure
+!data/recordings/.gitkeep
+!data/ml_training/.gitkeep
+!data/ml_features/.gitkeep
+
+# Tests
+tests/
+*.pytest_cache/
+
+# Documentation
+docs/
+*.md
+LICENSE
