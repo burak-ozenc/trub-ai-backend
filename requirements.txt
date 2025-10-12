@@ -38,3 +38,6 @@ requests==2.31.0
 # Validation
 pydantic==2.5.0
 email-validator==2.1.0
+
+# Cloud storage
+cloudinary==1.41.0

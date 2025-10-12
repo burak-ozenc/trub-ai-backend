@@ -6,6 +6,19 @@ class Settings:
     UPLOAD_DIR: str = os.getenv("UPLOAD_DIR", "data/recordings")
     MAX_FILE_SIZE: int = int(os.getenv("MAX_FILE_SIZE", "50000000"))  # 50MB
 
+    # Cloudinary configuration
+    CLOUDINARY_CLOUD_NAME: str = os.getenv("CLOUDINARY_CLOUD_NAME", "")
+    CLOUDINARY_API_KEY: str = os.getenv("CLOUDINARY_API_KEY", "")
+    CLOUDINARY_API_SECRET: str = os.getenv("CLOUDINARY_API_SECRET", "")
+    CLOUDINARY_FOLDER: str = os.getenv("CLOUDINARY_FOLDER", "trumpet-analyzer")
+
+    # Use Cloudinary if credentials are set, otherwise use local storage
+    USE_CLOUDINARY: bool = bool(
+        os.getenv("CLOUDINARY_CLOUD_NAME") and
+        os.getenv("CLOUDINARY_API_KEY") and
+        os.getenv("CLOUDINARY_API_SECRET")
+    )
+
     # Audio processing
     AUDIO_SAMPLE_RATE: Optional[int] = None  # Let librosa decide
     TRUMPET_LOW_FREQ: float = 233.0
@@ -79,7 +92,7 @@ class Settings:
     ML_CONFIDENCE_WEIGHT: float = 0.4  # Not used when ML_ENABLED = False
 
     def __init__(self):
-        # Ensure upload directory exists
+        # Ensure upload directory exists (for local storage fallback)
         os.makedirs(self.UPLOAD_DIR, exist_ok=True)
 
 settings = Settings()
