@@ -1,113 +1,187 @@
-# Trub-AI Backend
+# 🎺 Trub AI Backend
 
-AI-powered trumpet performance analysis and coaching system backend built with FastAPI.
+AI-powered trumpet performance analyzer with real-time audio processing and LLM feedback.
 
 ## Features
 
-- **Audio Analysis**: Real-time trumpet sound detection and performance analysis
-- **Breath Control Analysis**: Advanced breathing pattern detection and feedback
-- **Tone Quality Assessment**: Harmonic analysis and timbre evaluation
-- **AI Coaching**: LLM-powered personalized feedback and recommendations
-- **Interactive Q&A**: Chat with AI trumpet teacher for technique guidance
-- **Signal Processing**: Advanced audio preprocessing and noise reduction
+### Audio Analysis
+- **5-Dimension Performance Analysis**: Breath control, tone quality, rhythm/timing, musical expression, note flexibility
+- **Trumpet Sound Detection**: Rule-based acoustic analysis with optional ML support
+- **LLM Integration**: Natural language feedback via Ollama (local LLM)
+- **Audio Enhancement**: Noise reduction, spectral gating, high-pass filtering
 
-## Tech Stack
+### API Features
+- RESTful API with automatic documentation
+- JWT authentication
+- Recording history with audio playback
+- Progress tracking and statistics
+- File upload support (WAV/MP3)
 
-- **Framework**: FastAPI
-- **Audio Processing**: LibROSA, NumPy, SciPy
-- **AI/LLM**: Ollama (Local LLM)
-- **Machine Learning**: Scikit-learn (planned)
-- **Validation**: Pydantic
-- **Audio Formats**: WAV, MP3, M4A, FLAC
+## Prerequisites
 
-## Installation
-
-### Prerequisites
-- Python 3.8+
+- Python 3.11+
+- PostgreSQL 15+
 - FFmpeg
 - Ollama
 
-### Setup
+## Quick Start
+
+## 1. Clone Repository:
 ```bash
-# Clone repository
-git clone https://github.com/burak-ozenc/trub-ai-backend
+git clone https://github.com/burak-ozenc/trub-ai-backend.git
 cd trub-ai-backend
+```
 
-# Create virtual environment
-python -m venv trumpet-env
-source trumpet-env/bin/activate  # Windows: trumpet-env\Scripts\activate
+## 2. Create Conda Environment
+Create environment from environment.yml:
+```bash
+conda env create -f environment.yml
+conda activate trumpet-analyzer
+```
 
-# Install dependencies
-pip install -r requirements.txt
 
-# Install Ollama and download model
+## 3. Install System Dependencies
+### Windows:
+FFmpeg:
+
+Download from ffmpeg.org/download.html
+Extract and add to PATH
+Or use: 
+```bash
+winget install FFmpeg
+```
+
+PostgreSQL:
+
+Download from postgresql.org/download/windows
+Install using installer (remember your postgres password)
+
+### Ubuntu/Debian
+```bash
+sudo apt install -y ffmpeg postgresql
+```
+
+### macOS
+```bash
+brew install ffmpeg postgresql
+```
+
+## 4. Install Ollama
+### Windows:
+
+Download from ollama.ai/download/windows
+Run installer
+Open terminal and pull model:
+
+```bash
+ollama pull deepseek-r1:7b
+```
+
+### Linux/macOS:
+```bash
+curl -fsSL https://ollama.ai/install.sh | sh
+ollama pull deepseek-r1:7b
+```
+Alternative models (lighter/faster):
+```bash
 ollama pull tinyllama:1.1b
 ```
 
-### Configuration
+
+## 5. Setup PostgreSQL Database
+### Windows (using pgAdmin or psql):
+Open pgAdmin or run:
 ```bash
-# Create data directories
-mkdir -p data/recordings
-mkdir -p data/ml_training/{trumpet,non_trumpet}
-
-# Set environment variables (optional)
-export UPLOAD_DIR=data/recordings
-export OLLAMA_MODEL=tinyllama:1.1b
+psql -U postgres
 ```
-
-## Running the Server
-
+Then execute:
 ```bash
-# Development
-python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-
-# Or directly
-python app/main.py
+CREATE DATABASE trumpet_analyzer;
+CREATE USER trumpet_user WITH PASSWORD 'your_password';
+GRANT ALL PRIVILEGES ON DATABASE trumpet_analyzer TO trumpet_user;
 ```
 
-Server will be available at `http://localhost:8000`
 
-## API Endpoints
-
-### Core Analysis
-- `POST /analysis/comprehensive` - Full audio analysis with AI feedback
-- `POST /audio/analyze-breath` - Breath control analysis only
-- `POST /audio/analyze-tone` - Tone quality analysis only
-
-### AI Interaction
-- `POST /llm/ask-question` - Q&A without audio context
-- `POST /llm/ask-with-context` - Q&A with audio analysis context
-
-### Health & Config
-- `GET /health` - System health check
-- `GET /config` - API configuration info
-- `GET /docs` - Interactive API documentation
-
-## Audio Analysis Features
-
-### Trumpet Detection
-- Harmonic series verification
-- Spectral characteristic analysis
-- Pitch stability assessment
-- Attack transient detection
-
-### Performance Analysis
-- **Breath Control**: Pattern detection, consistency analysis
-- **Tone Quality**: Harmonic ratio, spectral clarity
-- **Signal Processing**: Bandpass filtering, noise reduction
-
-## Project Structure
-
-```
-app/
-├── core/           # Models, exceptions, constants
-├── api/endpoints/  # API route handlers
-├── services/       # Business logic
-├── analyzers/      # Audio analysis components
-├── utils/          # Utilities and preprocessing
-└── ml/            # Machine learning components (future)
+### Linux/macOS:
+```bash
+sudo -u postgres psql
 ```
 
-## License
+Then execute:
+```bash
+CREATE DATABASE trumpet_analyzer;
+CREATE USER trumpet_user WITH PASSWORD 'your_password';
+GRANT ALL PRIVILEGES ON DATABASE trumpet_analyzer TO trumpet_user;
+\q
+```
 
-#TODO
+## 6. Configure Environment Variables
+
+Required .env variables:
+```bash
+DATABASE_URL=postgresql://trumpet_user:your_password@localhost:5432/trumpet_analyzer
+SECRET_KEY=your-secret-key
+OLLAMA_MODEL=deepseek-r1:7b
+UPLOAD_DIR=data/recordings
+MAX_FILE_SIZE=50000000
+CORS_ORIGINS=http://localhost:3000,http://localhost:5173
+```
+
+## 7. Initialize database:
+```bash
+python scripts/init_db.py
+```
+
+## 8.Run application:
+```bash
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+# API Documentation
+Access interactive docs at:
+
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+
+## Key Endpoints
+### Authentication:
+
+- POST /auth/register - Register user
+- POST /auth/login - Login
+- GET /auth/me - Current user
+
+### Analysis:
+
+- POST /analysis/comprehensive - Full analysis with LLM
+- POST /audio/analyze - Technical analysis only
+- POST /audio/analyze-breath - Breath analysis
+- POST /audio/analyze-tone - Tone analysis
+
+### Recordings:
+
+- GET /recordings/ - List recordings
+- POST /recordings/ - Save recording
+- GET /recordings/{id}/audio - Stream audio
+- DELETE /recordings/{id} - Delete recording
+- GET /recordings/stats/progress - Progress stats
+
+### LLM:
+
+- POST /llm/ask-question - Ask question
+- POST /llm/ask-with-context - Ask with audio context
+
+
+
+## Configuration
+Edit app/config.py for:
+
+- Trumpet frequency range (233Hz - 2118Hz)
+- Breath analysis thresholds
+- File size limits
+- LLM model selection
+
+# License
+MIT License - see LICENSE file
+Contact
+Burak Özenc - GitHub
+Project: trub-ai-backend
