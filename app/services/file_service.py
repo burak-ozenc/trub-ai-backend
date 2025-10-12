@@ -120,7 +120,6 @@ class FileService:
                 # Upload to Cloudinary
                 result = cloudinary.uploader.upload(
                     temp_path,
-                    folder=settings.CLOUDINARY_FOLDER,
                     public_id=os.path.splitext(filename)[0],  # Use filename without extension
                     resource_type="video",  # Cloudinary treats audio as video
                     overwrite=False,
