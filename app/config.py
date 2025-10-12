@@ -28,9 +28,13 @@ class Settings:
     MIN_SILENCE_DURATION: float = 0.3
     SILENCE_THRESHOLD: float = 0.02
 
-    # LLM configuration
-    OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "tinyllama:1.1b")
+    # LLM configuration - Google AI Studio (Gemini)
+    GOOGLE_AI_API_KEY: str = os.getenv("GOOGLE_AI_API_KEY", "")
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-2.0-flash-exp")
     LLM_TIMEOUT: int = int(os.getenv("LLM_TIMEOUT", "60"))
+
+    # Legacy Ollama settings (for backwards compatibility)
+    OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "tinyllama:1.1b")
 
     # API configuration
     API_TITLE: str = "Trumpet Analyzer API"

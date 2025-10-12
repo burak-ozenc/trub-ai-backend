@@ -1,15 +1,25 @@
-﻿import ollama
-import json
+﻿import json
 from typing import List, Optional
+import google.generativeai as genai
 from app.core.models import AudioAnalysisResult, LLMResponse, QuestionResponse
 from app.core.exceptions import LLMServiceError
 from app.config import settings
 
+# Configure Google AI
+if settings.GOOGLE_AI_API_KEY:
+    genai.configure(api_key=settings.GOOGLE_AI_API_KEY)
+
 class LLMService:
-    """Service for LLM integration and feedback generation"""
+    """Service for LLM integration using Google Gemini"""
 
     def __init__(self, model_name: str = None):
-        self.model_name = model_name or settings.OLLAMA_MODEL
+        self.model_name = model_name or settings.GEMINI_MODEL
+
+        if not settings.GOOGLE_AI_API_KEY:
+            raise LLMServiceError("Google AI API key not configured")
+
+        # Initialize Gemini model
+        self.model = genai.GenerativeModel(self.model_name)
 
     async def get_comprehensive_feedback(
             self,
@@ -17,7 +27,7 @@ class LLMService:
             user_question: str
     ) -> LLMResponse:
         """
-        Generate comprehensive feedback using LLM
+        Generate comprehensive feedback using Google Gemini
         
         Args:
             analysis_result: Results from audio analysis
@@ -36,13 +46,9 @@ class LLMService:
             # Create structured prompt
             prompt = self._create_comprehensive_prompt(technical_data, user_question)
 
-            # Get LLM response
-            response = ollama.generate(
-                model=self.model_name,
-                prompt=prompt
-            )
-
-            feedback_text = response["response"]
+            # Get Gemini response
+            response = self.model.generate_content(prompt)
+            feedback_text = response.text
 
             return LLMResponse(
                 feedback=feedback_text,
@@ -72,14 +78,12 @@ class LLMService:
             context_used = analysis_context is not None
             prompt = self._create_qa_prompt(question, analysis_context)
 
-            response = ollama.generate(
-                model=self.model_name,
-                prompt=prompt
-            )
+            # Get Gemini response
+            response = self.model.generate_content(prompt)
 
             return QuestionResponse(
                 question=question,
-                answer=response["response"],
+                answer=response.text,
                 context_used=context_used
             )
 
