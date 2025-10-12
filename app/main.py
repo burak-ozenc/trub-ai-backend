@@ -6,7 +6,11 @@ import os
 
 from app.config import settings
 from app.api.endpoints import audio, analysis, llm, auth, users, recordings
-from app.api.dependencies import check_ollama_connection, check_upload_directory
+from app.api.dependencies import check_upload_directory
+
+# Import database components
+from app.database.connection import engine, Base
+from app.database import models  # This imports all models
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -18,11 +22,22 @@ app = FastAPI(
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,  # Now uses environment variable
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=settings.CORS_ALLOW_CREDENTIALS,
     allow_methods=settings.CORS_ALLOW_METHODS,
     allow_headers=settings.CORS_ALLOW_HEADERS,
 )
+
+# Startup event to create tables
+@app.on_event("startup")
+async def startup_event():
+    """Create database tables on startup"""
+    try:
+        # Create all tables
+        Base.metadata.create_all(bind=engine)
+        print("✅ Database tables created successfully")
+    except Exception as e:
+        print(f"❌ Error creating database tables: {e}")
 
 # Include API routers
 app.include_router(audio.router)
@@ -31,25 +46,6 @@ app.include_router(llm.router)
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(recordings.router)
-
-# TODO-Idea List (embedded in main for reference)
-"""
-✓ Breath Control Analysis - IMPLEMENTED
-- Embouchure Stability Analysis
-- Range Assessment 
-- Articulation Analysis
-- Scale/Exercise Recognition
-- Progress Tracking
-- Practice Session Analytics
-"""
-
-# TODO-LLM List (embedded in main for reference)
-"""
-✓ Conversational Feedback - IMPLEMENTED
-✓ Question Answering - IMPLEMENTED
-- Personalized Practice Plans
-- Performance Comparison
-"""
 
 @app.get("/")
 async def root():
@@ -69,13 +65,7 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    """
-    Health check endpoint
-    
-    Checks:
-    - Basic API functionality
-    - Upload directory accessibility
-    """
+    """Health check endpoint"""
     health_status = {
         "status": "healthy",
         "service": settings.API_TITLE,
@@ -88,6 +78,20 @@ async def health_check():
         "status": "healthy" if check_upload_directory() else "unhealthy",
         "path": settings.UPLOAD_DIR
     }
+
+    # Check database connection
+    try:
+        from sqlalchemy import text
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        health_status["checks"]["database"] = {
+            "status": "healthy"
+        }
+    except Exception as e:
+        health_status["checks"]["database"] = {
+            "status": "unhealthy",
+            "error": str(e)
+        }
 
     # Determine overall status
     all_healthy = all(
@@ -103,9 +107,7 @@ async def health_check():
 
 @app.get("/config")
 async def get_config():
-    """
-    Get non-sensitive configuration information
-    """
+    """Get non-sensitive configuration information"""
     return {
         "api_title": settings.API_TITLE,
         "api_version": settings.API_VERSION,
@@ -136,7 +138,6 @@ async def global_exception_handler(request, exc):
     )
 
 if __name__ == "__main__":
-    # Get port from environment variable (Koyeb sets this)
     port = int(os.getenv("PORT", 8000))
 
     uvicorn.run(
