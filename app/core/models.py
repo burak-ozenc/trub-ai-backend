@@ -214,3 +214,42 @@ class SimpleFeedbackResult(BaseModel):
     main_issue: Optional[str] = None  # Primary issue identified
     quick_tip: str  # One actionable tip
     next_step: str  # What to do next
+
+# Calendar Models
+class CalendarEntryBase(BaseModel):
+    exercise_id: int
+    scheduled_date: datetime
+    scheduled_time: Optional[str] = None  # HH:MM format
+    duration_minutes: Optional[int] = None
+    notes: Optional[str] = None
+
+
+class CalendarEntryCreate(CalendarEntryBase):
+    pass
+
+
+class CalendarEntryUpdate(BaseModel):
+    scheduled_date: Optional[datetime] = None
+    scheduled_time: Optional[str] = None
+    duration_minutes: Optional[int] = None
+    notes: Optional[str] = None
+    completed: Optional[bool] = None
+
+
+class CalendarEntryResponse(CalendarEntryBase):
+    id: int
+    user_id: int
+    completed: bool
+    practice_session_id: Optional[int]
+    created_at: datetime
+    updated_at: Optional[datetime]
+
+    class Config:
+        from_attributes = True
+
+
+class CalendarEntryWithExercise(CalendarEntryResponse):
+    exercise: ExerciseResponse
+
+    class Config:
+        from_attributes = True

@@ -30,6 +30,9 @@ app.include_router(llm.router)
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(recordings.router)
+app.include_router(exercises.router)
+app.include_router(practice.router)
+app.include_router(calendar.router)
 
 # TODO-Idea List (embedded in main for reference)
 """

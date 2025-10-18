@@ -62,3 +62,46 @@ class Exercise(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     is_active = Column(Boolean, default=True)
     order_index = Column(Integer, default=0)  # For ordering exercises
+
+
+class PracticeSession(Base):
+    __tablename__ = "practice_sessions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    exercise_id = Column(Integer, ForeignKey("exercises.id"), nullable=False, index=True)
+
+    # Session data
+    duration_seconds = Column(Integer, nullable=True)  # Actual duration
+    completed = Column(Boolean, default=False)
+
+    # Analysis results (if they recorded during session)
+    recording_id = Column(Integer, ForeignKey("recordings.id"), nullable=True)
+    simplified_feedback = Column(Text, nullable=True)  # Simple, actionable feedback
+
+    # Timestamps
+    started_at = Column(DateTime(timezone=True), server_default=func.now())
+    completed_at = Column(DateTime(timezone=True), nullable=True)
+
+class CalendarEntry(Base):
+    __tablename__ = "calendar_entries"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    exercise_id = Column(Integer, ForeignKey("exercises.id"), nullable=False, index=True)
+
+    # Schedule info
+    scheduled_date = Column(DateTime(timezone=True), nullable=False, index=True)  # Date for practice
+    scheduled_time = Column(String(10), nullable=True)  # Optional time like "14:00"
+    duration_minutes = Column(Integer, nullable=True)  # Planned duration
+
+    # Completion tracking
+    completed = Column(Boolean, default=False)
+    practice_session_id = Column(Integer, ForeignKey("practice_sessions.id"), nullable=True)  # Link to actual session
+
+    # Notes
+    notes = Column(Text, nullable=True)  # User's notes for this scheduled practice
+
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())

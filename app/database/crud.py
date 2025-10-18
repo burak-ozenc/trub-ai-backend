@@ -2,6 +2,9 @@
 from typing import Optional, List
 from app.database.models import User, Recording
 from app.core.security import get_password_hash, verify_password
+from app.database.models import Exercise, PracticeSession
+from app.database.models import CalendarEntry
+from datetime import datetime, date, timedelta
 
 def get_user_by_email(db: Session, email: str) -> Optional[User]:
     """Get user by email"""
@@ -186,3 +189,137 @@ def get_user_practice_sessions(db: Session, user_id: int,
     return db.query(PracticeSession).filter(
         PracticeSession.user_id == user_id
     ).order_by(PracticeSession.started_at.desc()).offset(skip).limit(limit).all()
+
+# Calendar CRUD
+def create_calendar_entry(
+        db: Session,
+        user_id: int,
+        exercise_id: int,
+        scheduled_date: datetime,
+        scheduled_time: str = None,
+        duration_minutes: int = None,
+        notes: str = None
+) -> CalendarEntry:
+    """Create a calendar entry (scheduled practice)"""
+    entry = CalendarEntry(
+        user_id=user_id,
+        exercise_id=exercise_id,
+        scheduled_date=scheduled_date,
+        scheduled_time=scheduled_time,
+        duration_minutes=duration_minutes,
+        notes=notes
+    )
+    db.add(entry)
+    db.commit()
+    db.refresh(entry)
+    return entry
+
+
+def get_calendar_entries_by_date_range(
+        db: Session,
+        user_id: int,
+        start_date: datetime,
+        end_date: datetime
+) -> List[CalendarEntry]:
+    """Get calendar entries for a date range"""
+    return db.query(CalendarEntry).filter(
+        CalendarEntry.user_id == user_id,
+        CalendarEntry.scheduled_date >= start_date,
+        CalendarEntry.scheduled_date <= end_date
+    ).order_by(CalendarEntry.scheduled_date).all()
+
+
+def get_calendar_entries_by_date(
+        db: Session,
+        user_id: int,
+        target_date: date
+) -> List[CalendarEntry]:
+    """Get calendar entries for a specific date"""
+    start_of_day = datetime.combine(target_date, datetime.min.time())
+    end_of_day = datetime.combine(target_date, datetime.max.time())
+
+    return db.query(CalendarEntry).filter(
+        CalendarEntry.user_id == user_id,
+        CalendarEntry.scheduled_date >= start_of_day,
+        CalendarEntry.scheduled_date <= end_of_day
+    ).order_by(CalendarEntry.scheduled_date).all()
+
+
+def get_calendar_entry_by_id(
+        db: Session,
+        entry_id: int,
+        user_id: int
+) -> Optional[CalendarEntry]:
+    """Get a specific calendar entry"""
+    return db.query(CalendarEntry).filter(
+        CalendarEntry.id == entry_id,
+        CalendarEntry.user_id == user_id
+    ).first()
+
+
+def update_calendar_entry(
+        db: Session,
+        entry_id: int,
+        user_id: int,
+        **kwargs
+) -> Optional[CalendarEntry]:
+    """Update calendar entry"""
+    entry = get_calendar_entry_by_id(db, entry_id, user_id)
+    if not entry:
+        return None
+
+    for key, value in kwargs.items():
+        if hasattr(entry, key) and value is not None:
+            setattr(entry, key, value)
+
+    db.commit()
+    db.refresh(entry)
+    return entry
+
+
+def mark_calendar_entry_complete(
+        db: Session,
+        entry_id: int,
+        user_id: int,
+        practice_session_id: int = None
+) -> Optional[CalendarEntry]:
+    """Mark a calendar entry as completed"""
+    entry = get_calendar_entry_by_id(db, entry_id, user_id)
+    if not entry:
+        return None
+
+    entry.completed = True
+    entry.practice_session_id = practice_session_id
+
+    db.commit()
+    db.refresh(entry)
+    return entry
+
+
+def delete_calendar_entry(
+        db: Session,
+        entry_id: int,
+        user_id: int
+) -> bool:
+    """Delete a calendar entry"""
+    entry = get_calendar_entry_by_id(db, entry_id, user_id)
+    if not entry:
+        return False
+
+    db.delete(entry)
+    db.commit()
+    return True
+
+
+def get_upcoming_practices(
+        db: Session,
+        user_id: int,
+        limit: int = 10
+) -> List[CalendarEntry]:
+    """Get upcoming scheduled practices"""
+    now = datetime.utcnow()
+    return db.query(CalendarEntry).filter(
+        CalendarEntry.user_id == user_id,
+        CalendarEntry.scheduled_date >= now,
+        CalendarEntry.completed == False
+    ).order_by(CalendarEntry.scheduled_date).limit(limit).all()
