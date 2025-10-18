@@ -41,3 +41,6 @@ soundfile==0.12.1
 
 # Signal processing
 matplotlib==3.7.4  # For potential visualization features
+
+# Torch
+torch==2.8.0
