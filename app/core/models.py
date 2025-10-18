@@ -155,3 +155,62 @@ class TrumpetDetectionResult(BaseModel):
     detection_features: Dict[str, Any]
     warning_message: Optional[str] = None
     recommendations: List[str] = []
+
+
+# Exercise Models
+class ExerciseBase(BaseModel):
+    title: str
+    description: Optional[str] = None
+    technique: str  # breathing, tone, rhythm, articulation, etc.
+    difficulty: str  # beginner, intermediate, advanced
+    instructions: str
+    duration_minutes: Optional[int] = None
+    sheet_music_url: Optional[str] = None
+
+
+class ExerciseCreate(ExerciseBase):
+    order_index: int = 0
+
+
+class ExerciseResponse(ExerciseBase):
+    id: int
+    order_index: int
+    created_at: datetime
+    is_active: bool
+
+    class Config:
+        from_attributes = True
+
+
+# Practice Session Models
+class PracticeSessionCreate(BaseModel):
+    exercise_id: int
+
+
+class PracticeSessionComplete(BaseModel):
+    duration_seconds: Optional[int] = None
+    recording_id: Optional[int] = None
+    simplified_feedback: Optional[str] = None
+
+
+class PracticeSessionResponse(BaseModel):
+    id: int
+    user_id: int
+    exercise_id: int
+    duration_seconds: Optional[int]
+    completed: bool
+    recording_id: Optional[int]
+    simplified_feedback: Optional[str]
+    started_at: datetime
+    completed_at: Optional[datetime]
+
+    class Config:
+        from_attributes = True
+
+
+# Simplified Feedback Model
+class SimpleFeedbackResult(BaseModel):
+    overall_status: str  # "Great!", "Good job!", "Needs work", etc.
+    main_issue: Optional[str] = None  # Primary issue identified
+    quick_tip: str  # One actionable tip
+    next_step: str  # What to do next

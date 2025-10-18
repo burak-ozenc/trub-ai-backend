@@ -41,3 +41,24 @@ class Recording(Base):
 
     audio_file_path = Column(String(50), nullable=False)
     # Note: Audio files stored separately (file storage or S3), not in DB
+
+class Exercise(Base):
+    __tablename__ = "exercises"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    # Exercise identification
+    title = Column(String(255), nullable=False)
+    description = Column(Text, nullable=True)
+    technique = Column(String(50), nullable=False)  # breathing, tone, rhythm, etc.
+    difficulty = Column(String(50), nullable=False)  # beginner, intermediate, advanced
+
+    # Exercise content
+    instructions = Column(Text, nullable=False)  # Step-by-step instructions
+    duration_minutes = Column(Integer, nullable=True)  # Recommended duration
+    sheet_music_url = Column(String(500), nullable=True)  # PDF URL or path
+
+    # Metadata
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    is_active = Column(Boolean, default=True)
+    order_index = Column(Integer, default=0)  # For ordering exercises

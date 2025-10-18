@@ -98,3 +98,91 @@ def delete_recording(db: Session, recording_id: int, user_id: int) -> bool:
 def get_recording_count(db: Session, user_id: int) -> int:
     """Get total recording count for user"""
     return db.query(Recording).filter(Recording.user_id == user_id).count()
+
+# Exercise CRUD
+def get_exercises(db: Session, technique: Optional[str] = None,
+                  difficulty: Optional[str] = None,
+                  skip: int = 0, limit: int = 50) -> List[Exercise]:
+    """Get exercises with optional filters"""
+    query = db.query(Exercise).filter(Exercise.is_active == True)
+
+    if technique:
+        query = query.filter(Exercise.technique == technique)
+    if difficulty:
+        query = query.filter(Exercise.difficulty == difficulty)
+
+    return query.order_by(Exercise.order_index).offset(skip).limit(limit).all()
+
+
+def get_exercise_by_id(db: Session, exercise_id: int) -> Optional[Exercise]:
+    """Get exercise by ID"""
+    return db.query(Exercise).filter(
+        Exercise.id == exercise_id,
+        Exercise.is_active == True
+    ).first()
+
+
+def create_exercise(db: Session, title: str, technique: str, difficulty: str,
+                    instructions: str, description: str = None,
+                    duration_minutes: int = None, sheet_music_url: str = None,
+                    order_index: int = 0) -> Exercise:
+    """Create new exercise"""
+    exercise = Exercise(
+        title=title,
+        description=description,
+        technique=technique,
+        difficulty=difficulty,
+        instructions=instructions,
+        duration_minutes=duration_minutes,
+        sheet_music_url=sheet_music_url,
+        order_index=order_index
+    )
+    db.add(exercise)
+    db.commit()
+    db.refresh(exercise)
+    return exercise
+
+
+# Practice Session CRUD
+def create_practice_session(db: Session, user_id: int, exercise_id: int) -> PracticeSession:
+    """Create new practice session"""
+    session = PracticeSession(
+        user_id=user_id,
+        exercise_id=exercise_id
+    )
+    db.add(session)
+    db.commit()
+    db.refresh(session)
+    return session
+
+
+def complete_practice_session(db: Session, session_id: int, user_id: int,
+                              duration_seconds: int = None,
+                              recording_id: int = None,
+                              simplified_feedback: str = None) -> Optional[PracticeSession]:
+    """Mark practice session as complete"""
+    session = db.query(PracticeSession).filter(
+        PracticeSession.id == session_id,
+        PracticeSession.user_id == user_id
+    ).first()
+
+    if not session:
+        return None
+
+    session.completed = True
+    session.completed_at = datetime.utcnow()
+    session.duration_seconds = duration_seconds
+    session.recording_id = recording_id
+    session.simplified_feedback = simplified_feedback
+
+    db.commit()
+    db.refresh(session)
+    return session
+
+
+def get_user_practice_sessions(db: Session, user_id: int,
+                               skip: int = 0, limit: int = 50) -> List[PracticeSession]:
+    """Get user's practice sessions"""
+    return db.query(PracticeSession).filter(
+        PracticeSession.user_id == user_id
+    ).order_by(PracticeSession.started_at.desc()).offset(skip).limit(limit).all()

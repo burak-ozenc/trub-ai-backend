@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 import uvicorn
 
 from app.config import settings
-from app.api.endpoints import audio, analysis, llm, auth, users, recordings
+from app.api.endpoints import audio, analysis, llm, auth, users, recordings, exercises, practice, calendar
 from app.api.dependencies import check_ollama_connection, check_upload_directory
 
 # Initialize FastAPI app
