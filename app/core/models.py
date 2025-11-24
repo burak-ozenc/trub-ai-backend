@@ -253,3 +253,55 @@ class CalendarEntryWithExercise(CalendarEntryResponse):
 
     class Config:
         from_attributes = True
+
+# Song Models
+class SongResponse(BaseModel):
+    """Song details response"""
+    id: int
+    title: str
+    composer: Optional[str] = None
+    artist: Optional[str] = None
+    genre: str
+    tempo: Optional[int] = None
+    key_signature: Optional[str] = None
+    time_signature: Optional[str] = None
+    duration_seconds: Optional[int] = None
+    is_public_domain: bool
+    order_index: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class SongListResponse(BaseModel):
+    """Song library list response"""
+    songs: List[SongResponse]
+    total: int
+    skip: int
+    limit: int
+
+
+# Play-Along Session Models
+class PlayAlongSessionCreate(BaseModel):
+    """Create play-along session request"""
+    song_id: int = Field(..., description="Song ID to play")
+    difficulty: str = Field(..., description="Difficulty level: beginner, intermediate, advanced")
+
+
+class PlayAlongSessionResponse(BaseModel):
+    """Play-along session response"""
+    id: int
+    user_id: int
+    song_id: int
+    difficulty: str
+    pitch_accuracy: Optional[float] = None
+    rhythm_accuracy: Optional[float] = None
+    total_score: Optional[float] = None
+    completed: bool
+    duration_seconds: Optional[int] = None
+    started_at: datetime
+    completed_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True

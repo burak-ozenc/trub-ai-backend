@@ -3,9 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import uvicorn
 
+# from app.api.endpoints.play_along import play_along_router
 from app.config import settings
-from app.api.endpoints import audio, analysis, llm, auth, users, recordings, exercises, practice, calendar
+from app.api.endpoints import audio, analysis, llm, auth, users, recordings, exercises, practice, calendar, play_along
 from app.api.dependencies import check_ollama_connection, check_upload_directory
+from app.api.endpoints import songs
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -33,6 +35,8 @@ app.include_router(recordings.router)
 app.include_router(exercises.router)
 app.include_router(practice.router)
 app.include_router(calendar.router)
+app.include_router(songs.router)
+app.include_router(play_along.router)
 
 # TODO-Idea List (embedded in main for reference)
 """

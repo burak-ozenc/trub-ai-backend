@@ -1,4 +1,5 @@
 ﻿from sqlalchemy.orm import Session
+from app.database.models import Song, PlayAlongSession
 from typing import Optional, List
 from app.database.models import User, Recording
 from app.core.security import get_password_hash, verify_password
@@ -323,3 +324,158 @@ def get_upcoming_practices(
         CalendarEntry.scheduled_date >= now,
         CalendarEntry.completed == False
     ).order_by(CalendarEntry.scheduled_date).limit(limit).all()
+
+# Add these Song CRUD functions to your existing crud.py
+
+# Song CRUD operations
+def get_songs(
+        db: Session,
+        genre: Optional[str] = None,
+        difficulty: Optional[str] = None,
+        skip: int = 0,
+        limit: int = 50
+) -> List[Song]:
+    """Get songs with optional filters"""
+    query = db.query(Song).filter(Song.is_active == True)
+
+    if genre:
+        query = query.filter(Song.genre == genre)
+
+    # Note: difficulty filter doesn't apply to Song directly
+    # Songs have all 3 difficulties, filter happens in frontend
+
+    return query.order_by(Song.order_index, Song.title).offset(skip).limit(limit).all()
+
+
+def get_song_by_id(db: Session, song_id: int) -> Optional[Song]:
+    """Get song by ID"""
+    return db.query(Song).filter(
+        Song.id == song_id,
+        Song.is_active == True
+    ).first()
+
+
+def create_song(
+        db: Session,
+        title: str,
+        genre: str,
+        composer: str = None,
+        artist: str = None,
+        tempo: int = None,
+        key_signature: str = None,
+        time_signature: str = None,
+        duration_seconds: int = None,
+        beginner_midi_path: str = None,
+        intermediate_midi_path: str = None,
+        advanced_midi_path: str = None,
+        beginner_sheet_music_path: str = None,
+        intermediate_sheet_music_path: str = None,
+        advanced_sheet_music_path: str = None,
+        backing_track_path: str = None,
+        is_public_domain: bool = True,
+        order_index: int = 0
+) -> Song:
+    """Create new song"""
+    song = Song(
+        title=title,
+        composer=composer,
+        artist=artist,
+        genre=genre,
+        tempo=tempo,
+        key_signature=key_signature,
+        time_signature=time_signature,
+        duration_seconds=duration_seconds,
+        beginner_midi_path=beginner_midi_path,
+        intermediate_midi_path=intermediate_midi_path,
+        advanced_midi_path=advanced_midi_path,
+        beginner_sheet_music_path=beginner_sheet_music_path,
+        intermediate_sheet_music_path=intermediate_sheet_music_path,
+        advanced_sheet_music_path=advanced_sheet_music_path,
+        backing_track_path=backing_track_path,
+        is_public_domain=is_public_domain,
+        order_index=order_index
+    )
+    db.add(song)
+    db.commit()
+    db.refresh(song)
+    return song
+
+
+def get_song_count(db: Session) -> int:
+    """Get total active song count"""
+    return db.query(Song).filter(Song.is_active == True).count()
+
+
+# PlayAlongSession CRUD operations
+def create_play_along_session(
+        db: Session,
+        user_id: int,
+        song_id: int,
+        difficulty: str
+) -> PlayAlongSession:
+    """Create new play-along session"""
+    session = PlayAlongSession(
+        user_id=user_id,
+        song_id=song_id,
+        difficulty=difficulty
+    )
+    db.add(session)
+    db.commit()
+    db.refresh(session)
+    return session
+
+
+def complete_play_along_session(
+        db: Session,
+        session_id: int,
+        user_id: int,
+        pitch_accuracy: float = None,
+        rhythm_accuracy: float = None,
+        total_score: float = None,
+        duration_seconds: int = None,
+        recording_path: str = None
+) -> Optional[PlayAlongSession]:
+    """Mark play-along session as complete"""
+    session = db.query(PlayAlongSession).filter(
+        PlayAlongSession.id == session_id,
+        PlayAlongSession.user_id == user_id
+    ).first()
+
+    if not session:
+        return None
+
+    session.completed = True
+    session.completed_at = datetime.utcnow()
+    session.pitch_accuracy = pitch_accuracy
+    session.rhythm_accuracy = rhythm_accuracy
+    session.total_score = total_score
+    session.duration_seconds = duration_seconds
+    session.recording_path = recording_path
+
+    db.commit()
+    db.refresh(session)
+    return session
+
+
+def get_user_play_along_sessions(
+        db: Session,
+        user_id: int,
+        skip: int = 0,
+        limit: int = 50
+) -> List[PlayAlongSession]:
+    """Get user's play-along sessions"""
+    return db.query(PlayAlongSession).filter(
+        PlayAlongSession.user_id == user_id
+    ).order_by(PlayAlongSession.started_at.desc()).offset(skip).limit(limit).all()
+
+
+def get_play_along_session_by_id(
+        db: Session,
+        session_id: int,
+        user_id: int
+) -> Optional[PlayAlongSession]:
+    """Get specific play-along session"""
+    return db.query(PlayAlongSession).filter(
+        PlayAlongSession.id == session_id,
+        PlayAlongSession.user_id == user_id
+    ).first()

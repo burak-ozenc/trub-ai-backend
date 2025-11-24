@@ -1,3 +1,5 @@
+import datetime
+
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, ForeignKey, JSON, Float
 from sqlalchemy.sql import func
 from app.database.connection import Base
@@ -105,3 +107,65 @@ class CalendarEntry(Base):
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class Song(Base):
+    __tablename__ = "songs"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    # Song identification
+    title = Column(String(255), nullable=False)
+    composer = Column(String(255), nullable=True)
+    artist = Column(String(255), nullable=True)
+    genre = Column(String(50), nullable=False)  # classical, folk, christmas, jazz
+
+    # File paths (relative to data/songs/)
+    beginner_midi_path = Column(String(500), nullable=True)
+    intermediate_midi_path = Column(String(500), nullable=True)
+    advanced_midi_path = Column(String(500), nullable=True)
+
+    beginner_sheet_music_path = Column(String(500), nullable=True)  # PDF path
+    intermediate_sheet_music_path = Column(String(500), nullable=True)
+    advanced_sheet_music_path = Column(String(500), nullable=True)
+
+    backing_track_path = Column(String(500), nullable=True)  # WAV path
+
+    # Musical metadata
+    tempo = Column(Integer, nullable=True)  # BPM
+    key_signature = Column(String(10), nullable=True)  # "Bb", "C", "F", etc.
+    time_signature = Column(String(10), nullable=True)  # "4/4", "3/4", "6/8"
+    duration_seconds = Column(Integer, nullable=True)
+
+    # Legal & content management
+    is_public_domain = Column(Boolean, default=True)
+    is_active = Column(Boolean, default=True)
+    order_index = Column(Integer, default=0)  # For sorting display
+
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class PlayAlongSession(Base):
+    __tablename__ = "play_along_sessions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    song_id = Column(Integer, ForeignKey("songs.id"), nullable=False, index=True)
+
+    difficulty = Column(String(50), nullable=False)  # beginner, intermediate, advanced
+
+    # Performance metrics
+    pitch_accuracy = Column(Float, nullable=True)  # 0-100
+    rhythm_accuracy = Column(Float, nullable=True)  # 0-100
+    total_score = Column(Float, nullable=True)  # 0-100
+
+    # Session data
+    completed = Column(Boolean, default=False)
+    duration_seconds = Column(Integer, nullable=True)
+    recording_path = Column(String(500), nullable=True)  # Optional recording file
+
+    # Timestamps
+    started_at = Column(DateTime(timezone=True), server_default=func.now())
+    completed_at = Column(DateTime(timezone=True), nullable=True)

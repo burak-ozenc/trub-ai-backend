@@ -44,3 +44,6 @@ matplotlib==3.7.4  # For potential visualization features
 
 # Torch
 torch==2.8.0
+
+#music21
+music21==9.1.0

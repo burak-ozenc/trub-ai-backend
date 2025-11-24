@@ -1,0 +1,226 @@
+{
+  "songs": [
+    {
+      "title": "Ode to Joy",
+      "composer": "Ludwig van Beethoven",
+      "genre": "classical",
+      "midi_file": "ode_to_joy.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "F?r Elise",
+      "composer": "Ludwig van Beethoven",
+      "genre": "classical",
+      "midi_file": "fur_elise.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "Canon in D",
+      "composer": "Johann Pachelbel",
+      "genre": "classical",
+      "midi_file": "canon_in_d.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "Symphony No. 40",
+      "composer": "Wolfgang Amadeus Mozart",
+      "genre": "classical",
+      "midi_file": "symphony_40.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "Moonlight Sonata",
+      "composer": "Ludwig van Beethoven",
+      "genre": "classical",
+      "midi_file": "moonlight_sonata.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "Air on the G String",
+      "composer": "Johann Sebastian Bach",
+      "genre": "classical",
+      "midi_file": "air_on_g_string.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "Toccata and Fugue in D Minor",
+      "composer": "Johann Sebastian Bach",
+      "genre": "classical",
+      "midi_file": "toccata_fugue.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "Spring (The Four Seasons)",
+      "composer": "Antonio Vivaldi",
+      "genre": "classical",
+      "midi_file": "spring_vivaldi.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "Eine Kleine Nachtmusik",
+      "composer": "Wolfgang Amadeus Mozart",
+      "genre": "classical",
+      "midi_file": "eine_kleine_nachtmusik.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "Trumpet Voluntary",
+      "composer": "Jeremiah Clarke",
+      "genre": "classical",
+      "midi_file": "trumpet_voluntary.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "Amazing Grace",
+      "composer": "Traditional",
+      "artist": "Traditional",
+      "genre": "folk",
+      "midi_file": "amazing_grace.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "Danny Boy",
+      "composer": "Traditional",
+      "artist": "Traditional",
+      "genre": "folk",
+      "midi_file": "danny_boy.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "Greensleeves",
+      "composer": "Traditional",
+      "artist": "Traditional",
+      "genre": "folk",
+      "midi_file": "greensleeves.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "Scarborough Fair",
+      "composer": "Traditional",
+      "artist": "Traditional",
+      "genre": "folk",
+      "midi_file": "scarborough_fair.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "House of the Rising Sun",
+      "composer": "Traditional",
+      "artist": "Traditional",
+      "genre": "folk",
+      "midi_file": "house_rising_sun.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "Shenandoah",
+      "composer": "Traditional",
+      "artist": "Traditional",
+      "genre": "folk",
+      "midi_file": "shenandoah.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "When the Saints Go Marching In",
+      "composer": "Traditional",
+      "artist": "Traditional",
+      "genre": "jazz",
+      "midi_file": "saints_marching.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "Oh! Susanna",
+      "composer": "Stephen Foster",
+      "genre": "folk",
+      "midi_file": "oh_susanna.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "Auld Lang Syne",
+      "composer": "Traditional",
+      "artist": "Traditional",
+      "genre": "folk",
+      "midi_file": "auld_lang_syne.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "Home on the Range",
+      "composer": "Traditional",
+      "artist": "Traditional",
+      "genre": "folk",
+      "midi_file": "home_on_range.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "Jingle Bells",
+      "composer": "James Lord Pierpont",
+      "genre": "christmas",
+      "midi_file": "jingle_bells.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "Silent Night",
+      "composer": "Franz Xaver Gruber",
+      "genre": "christmas",
+      "midi_file": "silent_night.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "Joy to the World",
+      "composer": "Isaac Watts",
+      "genre": "christmas",
+      "midi_file": "joy_to_world.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "Deck the Halls",
+      "composer": "Traditional",
+      "artist": "Traditional",
+      "genre": "christmas",
+      "midi_file": "deck_the_halls.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "We Wish You a Merry Christmas",
+      "composer": "Traditional",
+      "artist": "Traditional",
+      "genre": "christmas",
+      "midi_file": "merry_christmas.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "O Come All Ye Faithful",
+      "composer": "John Francis Wade",
+      "genre": "christmas",
+      "midi_file": "o_come_faithful.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "Hark! The Herald Angels Sing",
+      "composer": "Felix Mendelssohn",
+      "genre": "christmas",
+      "midi_file": "hark_herald.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "The First Noel",
+      "composer": "Traditional",
+      "artist": "Traditional",
+      "genre": "christmas",
+      "midi_file": "first_noel.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "O Holy Night",
+      "composer": "Adolphe Adam",
+      "genre": "christmas",
+      "midi_file": "o_holy_night.mid",
+      "is_public_domain": true
+    },
+    {
+      "title": "Away in a Manger",
+      "composer": "William James Kirkpatrick",
+      "genre": "christmas",
+      "midi_file": "away_in_manger.mid",
+      "is_public_domain": true
+    }
+  ]
+}
