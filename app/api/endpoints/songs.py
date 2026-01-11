@@ -14,6 +14,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from typing import List, Optional
+from pathlib import Path
 import os
 
 from app.database.connection import get_db
@@ -67,79 +68,8 @@ async def get_song_details(
     return song
 
 
-@router.get("/{song_id}/sheet-music/{difficulty}")
-async def get_sheet_music(
-        song_id: int,
-        difficulty: str,
-        db: Session = Depends(get_db),
-        current_user: User = Depends(get_current_user)
-):
-    """
-    Get sheet music PDF for specific song and difficulty
-    
-    Args:
-        song_id: Song ID
-        difficulty: beginner, intermediate, or advanced
-    
-    Returns:
-        PDF file
-    """
-    if difficulty not in ['beginner', 'intermediate', 'advanced']:
-        raise HTTPException(status_code=400, detail="Invalid difficulty level")
-
-    song = crud.get_song_by_id(db, song_id)
-    if not song:
-        raise HTTPException(status_code=404, detail="Song not found")
-
-    # Get appropriate sheet music path
-    sheet_music_path = getattr(song, f"{difficulty}_sheet_music_path")
-
-    if not sheet_music_path:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Sheet music not available for {difficulty} difficulty"
-        )
-
-    # Check if file exists
-    if not os.path.exists(sheet_music_path):
-        raise HTTPException(status_code=404, detail="Sheet music file not found")
-
-    return FileResponse(
-        path=sheet_music_path,
-        media_type="application/pdf",
-        filename=f"{song.title}_{difficulty}.pdf"
-    )
 
 
-@router.get("/{song_id}/backing-track")
-async def get_backing_track(
-        song_id: int,
-        db: Session = Depends(get_db),
-        current_user: User = Depends(get_current_user)
-):
-    """
-    Get backing track audio for song
-    
-    Returns:
-        WAV audio file
-    """
-    song = crud.get_song_by_id(db, song_id)
-    print('song', song.title)
-    # if not song:
-    #     raise HTTPException(status_code=404, detail="Song not found")
-
-    if not song.backing_track_path:
-        raise HTTPException(status_code=404, detail="Backing track not available")
-
-    # Check if file exists
-    if not os.path.exists(song.backing_track_path):
-        raise HTTPException(status_code=404, detail="Backing track file not found")
-
-    return FileResponse(
-        path=song.backing_track_path,
-        media_type="audio/wav",
-        filename=f"{song.title}_backing.wav"
-    )
 
 
 

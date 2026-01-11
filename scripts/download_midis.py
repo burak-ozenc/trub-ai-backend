@@ -11,41 +11,44 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # MIDI download sources - curated URLs for each song
 MIDI_SOURCES = {
+    # Test
+    "stellar_fingers.mid": "https://www.midiworld.com/download/4899"
+    
     # Classical songs
-    "ode_to_joy.mid": "https://www.midiworld.com/download/3947",
-    "fur_elise.mid": "https://www.midiworld.com/download/3946",
-    "canon_in_d.mid": "https://www.midiworld.com/download/3945",
-    "symphony_40.mid": "https://www.midiworld.com/download/3944",
-    "moonlight_sonata.mid": "https://www.midiworld.com/download/3943",
-    "air_on_g_string.mid": "https://www.midiworld.com/download/3942",
-    "toccata_fugue.mid": "https://www.midiworld.com/download/3941",
-    "spring_vivaldi.mid": "https://www.midiworld.com/download/3940",
-    "eine_kleine_nachtmusik.mid": "https://www.midiworld.com/download/3939",
-    "trumpet_voluntary.mid": "https://www.midiworld.com/download/3938",
-
-    # Folk songs
-    "amazing_grace.mid": "https://www.midiworld.com/download/3937",
-    "danny_boy.mid": "https://www.midiworld.com/download/3936",
-    "greensleeves.mid": "https://www.midiworld.com/download/3935",
-    "scarborough_fair.mid": "https://www.midiworld.com/download/3934",
-    "house_rising_sun.mid": "https://www.midiworld.com/download/3933",
-    "shenandoah.mid": "https://www.midiworld.com/download/3932",
-    "saints_marching.mid": "https://www.midiworld.com/download/3931",
-    "oh_susanna.mid": "https://www.midiworld.com/download/3930",
-    "auld_lang_syne.mid": "https://www.midiworld.com/download/3929",
-    "home_on_range.mid": "https://www.midiworld.com/download/3928",
-
-    # Christmas songs
-    "jingle_bells.mid": "https://www.midiworld.com/download/3927",
-    "silent_night.mid": "https://www.midiworld.com/download/3926",
-    "joy_to_world.mid": "https://www.midiworld.com/download/3925",
-    "deck_the_halls.mid": "https://www.midiworld.com/download/3924",
-    "merry_christmas.mid": "https://www.midiworld.com/download/3923",
-    "o_come_faithful.mid": "https://www.midiworld.com/download/3922",
-    "hark_herald.mid": "https://www.midiworld.com/download/3921",
-    "first_noel.mid": "https://www.midiworld.com/download/3920",
-    "o_holy_night.mid": "https://www.midiworld.com/download/3919",
-    "away_in_manger.mid": "https://www.midiworld.com/download/3918",
+    # "ode_to_joy.mid": "https://www.midiworld.com/download/3947",
+    # "fur_elise.mid": "https://www.midiworld.com/download/3946",
+    # "canon_in_d.mid": "https://www.midiworld.com/download/3945",
+    # "symphony_40.mid": "https://www.midiworld.com/download/3944",
+    # "moonlight_sonata.mid": "https://www.midiworld.com/download/3943",
+    # "air_on_g_string.mid": "https://www.midiworld.com/download/3942",
+    # "toccata_fugue.mid": "https://www.midiworld.com/download/3941",
+    # "spring_vivaldi.mid": "https://www.midiworld.com/download/3940",
+    # "eine_kleine_nachtmusik.mid": "https://www.midiworld.com/download/3939",
+    # "trumpet_voluntary.mid": "https://www.midiworld.com/download/3938",
+    # 
+    # # Folk songs
+    # "amazing_grace.mid": "https://www.midiworld.com/download/3937",
+    # "danny_boy.mid": "https://www.midiworld.com/download/3936",
+    # "greensleeves.mid": "https://www.midiworld.com/download/3935",
+    # "scarborough_fair.mid": "https://www.midiworld.com/download/3934",
+    # "house_rising_sun.mid": "https://www.midiworld.com/download/3933",
+    # "shenandoah.mid": "https://www.midiworld.com/download/3932",
+    # "saints_marching.mid": "https://www.midiworld.com/download/3931",
+    # "oh_susanna.mid": "https://www.midiworld.com/download/3930",
+    # "auld_lang_syne.mid": "https://www.midiworld.com/download/3929",
+    # "home_on_range.mid": "https://www.midiworld.com/download/3928",
+    # 
+    # # Christmas songs
+    # "jingle_bells.mid": "https://www.midiworld.com/download/3927",
+    # "silent_night.mid": "https://www.midiworld.com/download/3926",
+    # "joy_to_world.mid": "https://www.midiworld.com/download/3925",
+    # "deck_the_halls.mid": "https://www.midiworld.com/download/3924",
+    # "merry_christmas.mid": "https://www.midiworld.com/download/3923",
+    # "o_come_faithful.mid": "https://www.midiworld.com/download/3922",
+    # "hark_herald.mid": "https://www.midiworld.com/download/3921",
+    # "first_noel.mid": "https://www.midiworld.com/download/3920",
+    # "o_holy_night.mid": "https://www.midiworld.com/download/3919",
+    # "away_in_manger.mid": "https://www.midiworld.com/download/3918",
 }
 
 # Alternative: Search-based download (fallback)
@@ -107,7 +110,7 @@ def download_midi_file(url, filename, output_dir):
 
 def download_all_midis():
     """Main function to download all MIDI files"""
-
+    print("  Downloading all MIDI files...")
     # Setup directories
     base_dir = Path(__file__).parent.parent
     output_dir = base_dir / "data" / "source_midis"
@@ -148,6 +151,7 @@ def download_all_midis():
 
         # Try direct URL first
         if filename in MIDI_SOURCES:
+            print('filename: ',filename)
             success = download_midi_file(MIDI_SOURCES[filename], filename, output_dir)
             if success:
                 success_count += 1

@@ -1,3 +1,6 @@
 ﻿/to_delete
 .idea
 .env
+
+./data/recordings
+./data/ml_training
