@@ -1,5 +1,8 @@
 # 🎺 Trub AI Backend
 
+Note: This version is deprecated. Please visit the updated repository [here](https://github.com/burak-ozenc/trub-ai)
+.
+
 AI-powered trumpet performance analyzer with real-time audio processing and LLM feedback.
 
 ## Features
